@@ -1,0 +1,123 @@
+* Qcircuits
+
+Qcircuits is a tool for designing quantum experiments using
+abstractions that can be translated in different ways to real life
+experiments.
+
+* TODO Introduction
+TODO Reference the video but don't rely on it at all.
+
+This introductory video on quantum physics may help:
+MIT 8.04 Quantum Physics I, Spring 2013 (2013)
+
+https://www.youtube.com/watch?v=lZ3bPUKo5zc
+
+In the video, the instructor talks about the following properties being measured/selected:
+
+Source: A source of electrons
+Color: Black, White
+Harness: Hard, Soft
+
+Let's see some examples for induction of the rules this system works by:
+
+Example 1:
+#+BEGIN_SRC
+Source--|Color|--Black--|Color|--Black--detector(50%)
+              |               |--White--detector(0%)
+              |
+              |--White--|Color|--Black--detector(0%)
+                              |--White--detector(50%)
+#+END_SRC
+
+Example 2 is just like example 1 but with Harness instead of Color:
+#+BEGIN_SRC
+Source--|Harness|--Hard--|Harness|--Hard--detector(50%)
+                |                |--Soft--detector(0%)
+                |
+                |--Soft--|Harness|--Hard--detector(0%)
+                                 |--Soft--detector(50%)
+#+END_SRC
+
+These two examples seems to indicate that once you have
+detected/selected to be of one color or harness by some filter, the
+color or harness seems to persist,
+
+Example 3.1:
+#+BEGIN_SRC
+Source--|Color|--Black--|Harness|--Soft--detector(25%)
+              |                 |--Hard--detector(25%)
+              |
+              |--White--|Harness|--Soft--detector(25%)
+                                |--Hard--detector(25%)
+#+END_SRC
+
+Before we continue, let's point something important out: unless no
+detector gets anything, the 100% is just calculated relative to each
+other. We're not contemplating any way to measure how much of the 100%
+coming from the initial source is lost in the way before having the
+chance of reaching a detector.
+
+How much is there in terms of the initial source we can only guess
+with the current assumptions, it could be as in example 1.2, as in
+example 1.3 or many other possibilities and we wouldn't know, For the
+detectors would show the same in all cases.
+
+Example 3.2:
+#+BEGIN_SRC
+Source--100%--|Color|--Black--50%--|Harness|--Soft--25%--detector(25%)
+                    |                      |--Hard--25%--detector(25%)
+                    |
+                    |--White--50%--|Harness|--Soft--25%--detector(25%)
+                                           |--Hard--25%--detector(25%)
+#+END_SRC
+
+Example 3.3:
+#+BEGIN_SRC
+Source--100%--|Color|--Black--25%--|Harness|--Soft--6.25%--detector(25%)
+                    |                      |--Hard--6.25%--detector(25%)
+                    |
+                    |--White--25%--|Harness|--Soft--6.25%--detector(25%)
+                                           |--Hard--6.25%--detector(25%)
+#+END_SRC
+
+Example 4 is just like example 3 but in reverse:
+#+BEGIN_SRC
+Source--|Harness|--Soft--|Color|--Black--detector(25%)
+                |              |--White--detector(25%)
+                |
+                |--Hard--|Color|--Black--detector(25%)
+                               |--White--detector(25%)
+#+END_SRC
+
+These two examples seem to indicate color and harness are independent from each other.
+
+Example 5:
+#+BEGIN_SRC
+Source--|Color|--Black--|Harness|--Soft--|Color|--Black--detector(12.5%)
+              |                 |              |--White--detector(12.5%)
+              |                 |--Hard--|Color|--Black--detector(12.5%)
+              |                                |--White--detector(12.5%)
+              |--White--|Harness|--Soft--|Color|--Black--detector(12.5%)
+                                |              |--White--detector(12.5%)
+                                |--Hard--|Color|--Black--detector(12.5%)
+                                               |--White--detector(12.5%)
+#+END_SRC
+
+Example 6 is just like example 5 but in reverse and it's left to the reader to complete as an exercise.
+
+This is where things get interesting it seems that measuring the
+harness somehow "reset" the color that was previously filtered for
+(and vice versa). You can combine the two types of sensors in
+different ways and the same effect will be observed.
+
+* Change in notation
+
+Instead of using Color (Black, White) and Harness (Hard, Soft) filters,
+we will be using Vertical (Left, Right) and Horizontal filters. This
+abstraction that seems more intuitive for the properties observed,
+since it seems like a particle can only be in one of the 4 states at
+once, like an orientation.
+
+Question 1: Can the randomness be set from the beginning for each particle and the filters be purely deterministic?
+
+TODO Answer 1: I think this is possible, but it shouldn't. Most likely I'm missing something about quantum mechanics.
