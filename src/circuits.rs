@@ -24,6 +24,7 @@ impl Angle {
             a = a + 90;
         }
         self.angle = a
+        assert!(self.angle < 360);
     }
 
     pub fn observe_leftright(&mut self) {
@@ -37,25 +38,22 @@ impl Angle {
         }
         a = a + 90;
         self.angle = a
+        assert!(self.angle < 360);
     }
 
     pub fn is_up(&self) -> bool {
-        assert!(self.angle < 360);
         self.angle < 90
     }
 
     pub fn is_down(&self) -> bool {
-        assert!(self.angle < 360);
         self.angle >= 180 && self.angle < 270
     }
 
     pub fn is_left(&self) -> bool {
-        assert!(self.angle < 360);
         self.angle >= 270
     }
 
     pub fn is_right(&self) -> bool {
-        assert!(self.angle < 360);
         self.angle >= 90 && self.angle < 180
     }
 }
