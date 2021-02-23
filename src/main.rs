@@ -55,4 +55,41 @@ fn main() {
     c_tree3.run(100000);
     c_tree3.print();
 
+    let mut c_tree4 = QCircuit::new(
+        Filter::new(FilterType::LeftRight,
+                    Filter::new(FilterType::UpDown,
+                                Filter::new(FilterType::LeftRight,
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()),
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new())),
+                                Filter::new(FilterType::LeftRight,
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()),
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()))
+                    ),
+                    Filter::new(FilterType::UpDown,
+                                Filter::new(FilterType::LeftRight,
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()),
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new())),
+                                Filter::new(FilterType::LeftRight,
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()),
+                                            Filter::new(FilterType::UpDown,
+                                                        Detector::new(),
+                                                        Detector::new()))
+                    ),
+        ));
+    c_tree4.run(100000);
+    c_tree4.print();
 }
