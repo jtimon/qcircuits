@@ -10,8 +10,8 @@ struct Angle {
 
 impl Angle {
 
-    pub fn null_angle() -> Angle {
-        Angle {angle: 360}
+    pub fn random_angle() -> Angle {
+        Angle {angle: rand::thread_rng().gen_range(0, 360)}
     }
 
     pub fn random_updown() -> Angle {
@@ -60,7 +60,7 @@ impl Particle {
 
     pub fn new() -> Particle {
         Particle {
-            state: Angle::null_angle(),
+            state: Angle::random_angle(),
         }
     }
 }
