@@ -14,21 +14,29 @@ impl Angle {
         Angle {angle: rand::thread_rng().gen_range(0, 360)}
     }
 
-    pub fn random_updown() -> Angle {
+    pub fn observe_updown(&mut self) {
+        if self.is_up() || self.is_down() {
+            return;
+        }
+        // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, 180);
         if a >= 90 {
             a = a + 90;
         }
-        Angle {angle: a}
+        self.angle = a
     }
 
-    pub fn random_leftright() -> Angle {
+    pub fn observe_leftright(&mut self) {
+        if self.is_left() || self.is_right() {
+            return;
+        }
+        // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, 180);
         if a >= 90 {
             a = a + 90;
         }
         a = a + 90;
-        Angle {angle: a}
+        self.angle = a
     }
 
     pub fn is_up(&self) -> bool {
@@ -109,31 +117,6 @@ impl<CNA, CNB> Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
     pub fn new(f_type: FilterType, descenand_a: CNA, descenand_b: CNB) -> Filter<CNA, CNB> {
         Filter{f_type, descenand_a, descenand_b}
     }
-
-    // Used when the current state cannot be used by the current filter
-    fn random_state(&mut self, particle: &mut Particle) {
-        match self.f_type {
-            FilterType::UpDown => {
-                // 50% chance of going either way
-                particle.state = Angle::random_updown();
-                if particle.state.is_up() {
-                    self.descenand_a.receive_particle(particle);
-                } else {
-                    self.descenand_b.receive_particle(particle);
-                }
-            },
-
-            FilterType::LeftRight => {
-                // 50% chance of going either way
-                particle.state = Angle::random_leftright();
-                if !particle.state.is_left() {
-                    self.descenand_a.receive_particle(particle);
-                } else {
-                    self.descenand_b.receive_particle(particle);
-                }
-            },
-        }
-    }
 }
 
 impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
@@ -141,22 +124,20 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
     fn receive_particle(&mut self, particle: &mut Particle) {
         match self.f_type {
             FilterType::UpDown => {
+                particle.state.observe_updown();
                 if particle.state.is_up() {
                     self.descenand_a.receive_particle(particle);
                 } else if particle.state.is_down() {
                     self.descenand_b.receive_particle(particle);
-                } else {
-                    self.random_state(particle);
                 }
             },
 
             FilterType::LeftRight => {
+                particle.state.observe_leftright();
                 if particle.state.is_left() {
                     self.descenand_a.receive_particle(particle);
                 } else if particle.state.is_right() {
                     self.descenand_b.receive_particle(particle);
-                } else {
-                    self.random_state(particle);
                 }
             },
         }
