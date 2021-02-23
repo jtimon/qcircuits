@@ -31,24 +31,24 @@ impl Angle {
         Angle {angle: a}
     }
 
-    pub fn is_updown(&self) -> bool {
-        self.angle < 90 || (self.angle >= 180 && self.angle < 270)
-    }
-
     pub fn is_up(&self) -> bool {
         assert!(self.angle < 360);
-        assert!(self.is_updown());
         self.angle < 90
     }
 
-    pub fn is_leftright(&self) -> bool {
-        (self.angle >= 90 && self.angle < 180) || (self.angle >= 270 && self.angle < 360)
+    pub fn is_down(&self) -> bool {
+        assert!(self.angle < 360);
+        self.angle >= 180 && self.angle < 270
     }
 
     pub fn is_left(&self) -> bool {
         assert!(self.angle < 360);
-        assert!(self.is_leftright());
         self.angle >= 270
+    }
+
+    pub fn is_right(&self) -> bool {
+        assert!(self.angle < 360);
+        self.angle >= 90 && self.angle < 180
     }
 }
 
@@ -141,24 +141,20 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
     fn receive_particle(&mut self, particle: &mut Particle) {
         match self.f_type {
             FilterType::UpDown => {
-                if particle.state.is_updown() {
-                    if particle.state.is_up() {
-                        self.descenand_a.receive_particle(particle);
-                    } else {
-                        self.descenand_b.receive_particle(particle);
-                    }
+                if particle.state.is_up() {
+                    self.descenand_a.receive_particle(particle);
+                } else if particle.state.is_down() {
+                    self.descenand_b.receive_particle(particle);
                 } else {
                     self.random_state(particle);
                 }
             },
 
             FilterType::LeftRight => {
-                if particle.state.is_leftright() {
-                    if particle.state.is_left() {
-                        self.descenand_a.receive_particle(particle);
-                    } else {
-                        self.descenand_b.receive_particle(particle);
-                    }
+                if particle.state.is_left() {
+                    self.descenand_a.receive_particle(particle);
+                } else if particle.state.is_right() {
+                    self.descenand_b.receive_particle(particle);
                 } else {
                     self.random_state(particle);
                 }
