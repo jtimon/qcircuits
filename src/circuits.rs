@@ -14,16 +14,20 @@ impl Angle {
         Angle {angle: rand::thread_rng().gen_range(0, 360)}
     }
 
+    pub fn get_acceptance_angle() -> u16 {
+        45
+    }
+
     pub fn observe_updown(&mut self) {
         if self.is_up() || self.is_down() {
             return;
         }
         // 50% chance of going either way
-        let mut a = rand::thread_rng().gen_range(0, 180);
-        if a >= 90 {
-            a = a + 90;
+        let mut a = rand::thread_rng().gen_range(0, Angle::get_acceptance_angle() * 4);
+        if a >= Angle::get_acceptance_angle() * 2 {
+            a = a + Angle::get_acceptance_angle() * 2;
         }
-        self.angle = a
+        self.angle = a;
         assert!(self.angle < 360);
     }
 
@@ -32,12 +36,12 @@ impl Angle {
             return;
         }
         // 50% chance of going either way
-        let mut a = rand::thread_rng().gen_range(0, 180);
-        if a >= 90 {
-            a = a + 90;
+        let mut a = rand::thread_rng().gen_range(0, Angle::get_acceptance_angle() * 4);
+        if a >= Angle::get_acceptance_angle() * 2 {
+            a = a + Angle::get_acceptance_angle() * 2;
         }
-        a = a + 90;
-        self.angle = a
+        a = a + Angle::get_acceptance_angle() * 2;
+        self.angle = a;
         assert!(self.angle < 360);
     }
 
