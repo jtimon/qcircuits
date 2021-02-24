@@ -4,6 +4,11 @@ use rand::Rng;
 
 pub enum FilterType {UpDown, LeftRight}
 
+const UP: u16 = 45;
+const RIGHT: u16 = 135;
+const DOWN: u16 = 225;
+const LEFT: u16 = 315;
+
 struct Angle {
     angle: u16
 }
@@ -46,19 +51,23 @@ impl Angle {
     }
 
     pub fn is_up(&self) -> bool {
-        self.angle < 90
+        (self.angle < UP + Angle::get_acceptance_angle()) &&
+            (self.angle >= UP - Angle::get_acceptance_angle())
     }
 
     pub fn is_down(&self) -> bool {
-        self.angle >= 180 && self.angle < 270
+        (self.angle < DOWN + Angle::get_acceptance_angle()) &&
+            (self.angle >= DOWN - Angle::get_acceptance_angle())
     }
 
     pub fn is_left(&self) -> bool {
-        self.angle >= 270
+        (self.angle < LEFT + Angle::get_acceptance_angle()) &&
+            (self.angle >= LEFT - Angle::get_acceptance_angle())
     }
 
     pub fn is_right(&self) -> bool {
-        self.angle >= 90 && self.angle < 180
+        (self.angle < RIGHT + Angle::get_acceptance_angle()) &&
+            (self.angle >= RIGHT - Angle::get_acceptance_angle())
     }
 }
 
