@@ -8,6 +8,7 @@ const UP: u16 = 45;
 const RIGHT: u16 = 135;
 const DOWN: u16 = 225;
 const LEFT: u16 = 315;
+const MAX: u16 = 360;
 
 struct Angle {
     angle: u16
@@ -16,7 +17,7 @@ struct Angle {
 impl Angle {
 
     pub fn random_angle() -> Angle {
-        Angle {angle: rand::thread_rng().gen_range(0, 360)}
+        Angle {angle: rand::thread_rng().gen_range(0, MAX)}
     }
 
     pub fn get_acceptance_angle() -> u16 {
@@ -33,7 +34,7 @@ impl Angle {
             a = a + Angle::get_acceptance_angle() * 2;
         }
         self.angle = a;
-        assert!(self.angle < 360);
+        assert!(self.angle < MAX);
     }
 
     pub fn observe_leftright(&mut self) {
@@ -47,7 +48,7 @@ impl Angle {
         }
         a = a + Angle::get_acceptance_angle() * 2;
         self.angle = a;
-        assert!(self.angle < 360);
+        assert!(self.angle < MAX);
     }
 
     pub fn is_up(&self) -> bool {
