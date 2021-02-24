@@ -4,10 +4,10 @@ use rand::Rng;
 
 pub enum FilterType {UpDown, LeftRight}
 
-const UP: u16 = 45;
-const RIGHT: u16 = 135;
-const DOWN: u16 = 225;
-const LEFT: u16 = 315;
+const UP: u16 = 0;
+const RIGHT: u16 = 90;
+const DOWN: u16 = 180;
+const LEFT: u16 = 270;
 const MAX: u16 = 360;
 
 struct Angle {
@@ -30,8 +30,12 @@ impl Angle {
         }
         // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, Angle::get_acceptance_angle() * 4);
-        if a >= Angle::get_acceptance_angle() * 2 {
-            a = a + Angle::get_acceptance_angle() * 2;
+        if a < Angle::get_acceptance_angle() {
+            a = a + LEFT + Angle::get_acceptance_angle();
+        } else if a < Angle::get_acceptance_angle() * 2 {
+            a = a - Angle::get_acceptance_angle();
+        } else if a >= Angle::get_acceptance_angle() * 2 {
+            a = a + Angle::get_acceptance_angle();
         }
         self.angle = a;
         assert!(self.angle < MAX);
@@ -46,14 +50,14 @@ impl Angle {
         if a >= Angle::get_acceptance_angle() * 2 {
             a = a + Angle::get_acceptance_angle() * 2;
         }
-        a = a + Angle::get_acceptance_angle() * 2;
+        a = a + Angle::get_acceptance_angle();
         self.angle = a;
         assert!(self.angle < MAX);
     }
 
     pub fn is_up(&self) -> bool {
-        (self.angle < UP + Angle::get_acceptance_angle()) &&
-            (self.angle >= UP - Angle::get_acceptance_angle())
+        (self.angle < UP + Angle::get_acceptance_angle()) ||
+            (self.angle >= UP + MAX - Angle::get_acceptance_angle())
     }
 
     pub fn is_down(&self) -> bool {
