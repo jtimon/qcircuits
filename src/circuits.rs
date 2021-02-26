@@ -9,6 +9,7 @@ const RIGHT: u16 = 90;
 const DOWN: u16 = 180;
 const LEFT: u16 = 270;
 const MAX: u16 = 360;
+const ACCEPTANCE_ANGLE: u16 = 45;
 
 struct Angle {
     angle: u16
@@ -18,10 +19,6 @@ impl Angle {
 
     pub fn random_angle() -> Angle {
         Angle {angle: rand::thread_rng().gen_range(0, MAX)}
-    }
-
-    pub fn get_acceptance_angle() -> u16 {
-        45
     }
 }
 
@@ -38,23 +35,23 @@ impl Particle {
     }
 
     pub fn is_up(&self) -> bool {
-        (self.state.angle < UP + Angle::get_acceptance_angle()) ||
-            (self.state.angle >= UP + MAX - Angle::get_acceptance_angle())
+        (self.state.angle < UP + ACCEPTANCE_ANGLE) ||
+            (self.state.angle >= UP + MAX - ACCEPTANCE_ANGLE)
     }
 
     pub fn is_down(&self) -> bool {
-        (self.state.angle < DOWN + Angle::get_acceptance_angle()) &&
-            (self.state.angle >= DOWN - Angle::get_acceptance_angle())
+        (self.state.angle < DOWN + ACCEPTANCE_ANGLE) &&
+            (self.state.angle >= DOWN - ACCEPTANCE_ANGLE)
     }
 
     pub fn is_left(&self) -> bool {
-        (self.state.angle < LEFT + Angle::get_acceptance_angle()) &&
-            (self.state.angle >= LEFT - Angle::get_acceptance_angle())
+        (self.state.angle < LEFT + ACCEPTANCE_ANGLE) &&
+            (self.state.angle >= LEFT - ACCEPTANCE_ANGLE)
     }
 
     pub fn is_right(&self) -> bool {
-        (self.state.angle < RIGHT + Angle::get_acceptance_angle()) &&
-            (self.state.angle >= RIGHT - Angle::get_acceptance_angle())
+        (self.state.angle < RIGHT + ACCEPTANCE_ANGLE) &&
+            (self.state.angle >= RIGHT - ACCEPTANCE_ANGLE)
     }
 
     pub fn observe_updown(&mut self) {
@@ -62,13 +59,13 @@ impl Particle {
             return;
         }
         // 50% chance of going either way
-        let mut a = rand::thread_rng().gen_range(0, Angle::get_acceptance_angle() * 4);
-        if a < Angle::get_acceptance_angle() {
-            a = a + LEFT + Angle::get_acceptance_angle();
-        } else if a < Angle::get_acceptance_angle() * 2 {
-            a = a - Angle::get_acceptance_angle();
-        } else if a >= Angle::get_acceptance_angle() * 2 {
-            a = a + Angle::get_acceptance_angle();
+        let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
+        if a < ACCEPTANCE_ANGLE {
+            a = a + LEFT + ACCEPTANCE_ANGLE;
+        } else if a < ACCEPTANCE_ANGLE * 2 {
+            a = a - ACCEPTANCE_ANGLE;
+        } else if a >= ACCEPTANCE_ANGLE * 2 {
+            a = a + ACCEPTANCE_ANGLE;
         }
         self.state.angle = a;
         assert!(self.state.angle < MAX);
@@ -79,11 +76,11 @@ impl Particle {
             return;
         }
         // 50% chance of going either way
-        let mut a = rand::thread_rng().gen_range(0, Angle::get_acceptance_angle() * 4);
-        if a >= Angle::get_acceptance_angle() * 2 {
-            a = a + Angle::get_acceptance_angle() * 2;
+        let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
+        if a >= ACCEPTANCE_ANGLE * 2 {
+            a = a + ACCEPTANCE_ANGLE * 2;
         }
-        a = a + Angle::get_acceptance_angle();
+        a = a + ACCEPTANCE_ANGLE;
         self.state.angle = a;
         assert!(self.state.angle < MAX);
     }
