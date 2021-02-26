@@ -23,6 +23,39 @@ impl Angle {
     pub fn get_acceptance_angle() -> u16 {
         45
     }
+}
+
+pub struct Particle {
+    state: Angle
+}
+
+impl Particle {
+
+    pub fn new() -> Particle {
+        Particle {
+            state: Angle::random_angle(),
+        }
+    }
+
+    pub fn is_up(&self) -> bool {
+        (self.state.angle < UP + Angle::get_acceptance_angle()) ||
+            (self.state.angle >= UP + MAX - Angle::get_acceptance_angle())
+    }
+
+    pub fn is_down(&self) -> bool {
+        (self.state.angle < DOWN + Angle::get_acceptance_angle()) &&
+            (self.state.angle >= DOWN - Angle::get_acceptance_angle())
+    }
+
+    pub fn is_left(&self) -> bool {
+        (self.state.angle < LEFT + Angle::get_acceptance_angle()) &&
+            (self.state.angle >= LEFT - Angle::get_acceptance_angle())
+    }
+
+    pub fn is_right(&self) -> bool {
+        (self.state.angle < RIGHT + Angle::get_acceptance_angle()) &&
+            (self.state.angle >= RIGHT - Angle::get_acceptance_angle())
+    }
 
     pub fn observe_updown(&mut self) {
         if self.is_up() || self.is_down() {
@@ -37,8 +70,8 @@ impl Angle {
         } else if a >= Angle::get_acceptance_angle() * 2 {
             a = a + Angle::get_acceptance_angle();
         }
-        self.angle = a;
-        assert!(self.angle < MAX);
+        self.state.angle = a;
+        assert!(self.state.angle < MAX);
     }
 
     pub fn observe_leftright(&mut self) {
@@ -51,41 +84,8 @@ impl Angle {
             a = a + Angle::get_acceptance_angle() * 2;
         }
         a = a + Angle::get_acceptance_angle();
-        self.angle = a;
-        assert!(self.angle < MAX);
-    }
-
-    pub fn is_up(&self) -> bool {
-        (self.angle < UP + Angle::get_acceptance_angle()) ||
-            (self.angle >= UP + MAX - Angle::get_acceptance_angle())
-    }
-
-    pub fn is_down(&self) -> bool {
-        (self.angle < DOWN + Angle::get_acceptance_angle()) &&
-            (self.angle >= DOWN - Angle::get_acceptance_angle())
-    }
-
-    pub fn is_left(&self) -> bool {
-        (self.angle < LEFT + Angle::get_acceptance_angle()) &&
-            (self.angle >= LEFT - Angle::get_acceptance_angle())
-    }
-
-    pub fn is_right(&self) -> bool {
-        (self.angle < RIGHT + Angle::get_acceptance_angle()) &&
-            (self.angle >= RIGHT - Angle::get_acceptance_angle())
-    }
-}
-
-pub struct Particle {
-    state: Angle
-}
-
-impl Particle {
-
-    pub fn new() -> Particle {
-        Particle {
-            state: Angle::random_angle(),
-        }
+        self.state.angle = a;
+        assert!(self.state.angle < MAX);
     }
 }
 
@@ -140,19 +140,19 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
     fn receive_particle(&mut self, particle: &mut Particle) {
         match self.f_type {
             FilterType::UpDown => {
-                particle.state.observe_updown();
-                if particle.state.is_up() {
+                particle.observe_updown();
+                if particle.is_up() {
                     self.descenand_a.receive_particle(particle);
-                } else if particle.state.is_down() {
+                } else if particle.is_down() {
                     self.descenand_b.receive_particle(particle);
                 }
             },
 
             FilterType::LeftRight => {
-                particle.state.observe_leftright();
-                if particle.state.is_left() {
+                particle.observe_leftright();
+                if particle.is_left() {
                     self.descenand_a.receive_particle(particle);
-                } else if particle.state.is_right() {
+                } else if particle.is_right() {
                     self.descenand_b.receive_particle(particle);
                 }
             },
