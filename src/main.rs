@@ -21,6 +21,17 @@ fn main() {
     c_updown_series.run(100000);
     c_updown_series.print();
 
+    let mut c_leftright_series = QCircuit::new(
+        Filter::new(FilterType::LeftRight,
+                    Filter::new(FilterType::LeftRight,
+                                Filter::new(FilterType::LeftRight,
+                                            Detector::new(),
+                                            Detector::new()),
+                                Detector::new()),
+                    Detector::new()));
+    c_leftright_series.run(100000);
+    c_leftright_series.print();
+
     let mut c_tree2 = QCircuit::new(
         Filter::new(FilterType::LeftRight,
                     Filter::new(FilterType::UpDown,
