@@ -4,4 +4,5 @@
 //! abstractions that can be translated in different ways to real life
 //! experiments.
 
+pub mod angle;
 pub mod circuits;

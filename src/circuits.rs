@@ -2,6 +2,8 @@
 
 use rand::Rng;
 
+use crate::angle::Angle;
+
 pub enum FilterType {UpDown, LeftRight}
 
 const UP: u16 = 0;
@@ -10,17 +12,6 @@ const DOWN: u16 = 180;
 const LEFT: u16 = 270;
 const MAX: u16 = 360;
 const ACCEPTANCE_ANGLE: u16 = 45;
-
-struct Angle {
-    angle: u16
-}
-
-impl Angle {
-
-    pub fn random_angle() -> Angle {
-        Angle {angle: rand::thread_rng().gen_range(0, MAX)}
-    }
-}
 
 pub struct Particle {
     state: Angle
