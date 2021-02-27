@@ -1,10 +1,16 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
-use crate::particle::Particle;
-
 pub enum FilterType {UpDown, LeftRight}
 
-// Filters send particles to either descenand_a or descenand_b
+/// A particle can be observed by a Filter or counted by a Detector.
+pub trait Particle {
+    // if up returns true, false otherwise
+    fn observe_updown(&mut self) -> bool;
+    // if left returns true, false otherwise
+    fn observe_leftright(&mut self) -> bool;
+}
+
+/// Filters send particles to either descenand_a or descenand_b
 pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,

@@ -3,7 +3,7 @@
 use rand::Rng;
 
 use crate::angle::Angle;
-use crate::particle::Particle;
+use crate::circuits::Particle;
 
 const UP: u16 = 0;
 const RIGHT: u16 = 90;
