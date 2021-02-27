@@ -1,12 +1,15 @@
 
+use qcircuits::angle::MAX_ANGLE;
 use qcircuits::cfactory::QCircuitFactory;
 use qcircuits::circuits::{
     FilterType,
     ParticleSource,
 };
 use qcircuits::sources::{
-    AngleParticleSource,
-    EnumParticleSource,
+    // AngleParticleSource,
+    // EnumParticleSource,
+    DetAngleParticleSource,
+    DetAngleParticleSourceDebug,
 };
 
 fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_source_a: PSA, particle_source_b: PSB, repetitions: u32) {
@@ -44,6 +47,9 @@ fn main() {
     println!("- Random angles hypothesis (non deterministic hypothesis)");
     println!("");
 
-    println!("Compare Enum and Angle hypotheses (both non deterministic hypothesis):\n");
-    compare_print_hypothesis(EnumParticleSource{}, AngleParticleSource{}, 100000);
+    // println!("Compare Enum and Angle hypotheses (both non deterministic hypothesis):\n");
+    // compare_print_hypothesis(EnumParticleSource{}, AngleParticleSource{}, 100000);
+
+    println!("Compare deterministic Angle hypotheses with random and controlled source (both deterministic hypotheses):\n");
+    compare_print_hypothesis(DetAngleParticleSource{}, DetAngleParticleSourceDebug{}, MAX_ANGLE as u32 * MAX_ANGLE as u32);
 }

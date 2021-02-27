@@ -2,6 +2,7 @@
 use rand::Rng;
 
 use crate::angle::{Angle, MAX_ANGLE};
+use crate::hypotheses::det_ang::DetAngleParticle;
 use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
@@ -41,13 +42,24 @@ impl ParticleSource for AngleParticleSource {
     }
 }
 
-pub struct AngleParticleSourceDebug;
+pub struct DetAngleParticleSource;
 
-impl ParticleSource for AngleParticleSourceDebug {
+impl ParticleSource for DetAngleParticleSource {
+    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+        for _ in 0..particles {
+            let mut p = DetAngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE));
+            filter.receive_particle(&mut p);
+        }
+    }
+}
+
+pub struct DetAngleParticleSourceDebug;
+
+impl ParticleSource for DetAngleParticleSourceDebug {
     fn emit_particles(&self, filter: &mut Filter, particles: u32){
         let mut angle = Angle::new(0);
         for _ in 0..particles {
-            let mut p = AngleParticle::new(angle.angle);
+            let mut p = DetAngleParticle::new(angle.angle);
             filter.receive_particle(&mut p);
             angle = angle + 1;
         }
