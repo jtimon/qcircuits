@@ -5,72 +5,71 @@ use crate::particle::Particle;
 
 pub enum FilterType {UpDown, LeftRight}
 
-// Detectors are terminal nodes with no descendants
-pub struct Detector {
-    particle_counter: u32
-}
-
-impl Detector {
-
-    pub fn new() -> Detector {
-        Detector{particle_counter: 0}
-    }
-
-    pub fn reset(&mut self) {
-        self.particle_counter = 0;
-    }
-}
-
-/// CircuitNode process particles, they can be filters or detectors
-pub trait CircuitNode {
-    fn receive_particle(&mut self, particle: &mut dyn Particle);
-    fn get_string(&self, prefix: &String) -> String;
-}
-
-impl CircuitNode for Detector {
-    fn receive_particle(&mut self, _particle: &mut dyn Particle) {
-        self.particle_counter = self.particle_counter + 1;
-    }
-
-    fn get_string(&self, _prefix: &String) -> String {
-        format!("Detector: {} particles\n", self.particle_counter)
-    }
-}
-
 // Filters send particles to either descenand_a or descenand_b
-pub struct Filter<CNA: CircuitNode, CNB: CircuitNode> {
+pub struct Filter {
     f_type: FilterType,
-    descenand_a: CNA,
-    descenand_b: CNB
+    descenand_a: Option<Box<Filter>>,
+    descenand_b: Option<Box<Filter>>,
+    particle_counter_a: u32,
+    particle_counter_b: u32
 }
 
-impl<CNA, CNB> Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
+impl Filter {
 
-    pub fn new(f_type: FilterType, descenand_a: CNA, descenand_b: CNB) -> Filter<CNA, CNB> {
-        Filter{f_type, descenand_a, descenand_b}
+    pub fn new(f_type: FilterType, descenand_a: Option<Box<Filter>>, descenand_b: Option<Box<Filter>>) -> Filter {
+        Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
     }
-}
 
-impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
+    fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
+        self.particle_counter_a += 1;
+        if let &mut Some(ref mut x) = &mut self.descenand_a {
+            x.receive_particle(particle);
+        }
+    }
+
+    fn transfer_to_b(&mut self, particle: &mut dyn Particle) {
+        self.particle_counter_b += 1;
+        if let &mut Some(ref mut x) = &mut self.descenand_b {
+            x.receive_particle(particle);
+        }
+    }
 
     fn receive_particle(&mut self, particle: &mut dyn Particle) {
         match self.f_type {
             FilterType::UpDown => {
                 if particle.observe_updown() {
-                    self.descenand_a.receive_particle(particle);
+                    self.transfer_to_a(particle);
                 } else {
-                    self.descenand_b.receive_particle(particle);
+                    self.transfer_to_b(particle);
                 }
             },
 
             FilterType::LeftRight => {
                 if particle.observe_leftright() {
-                    self.descenand_a.receive_particle(particle);
+                    self.transfer_to_a(particle);
                 } else {
-                    self.descenand_b.receive_particle(particle);
+                    self.transfer_to_b(particle);
                 }
             },
         }
+    }
+
+    fn get_descenand_a_string(&self, prefix: &String) -> String {
+        let descenand_a_string;
+        match &self.descenand_a {
+            Some(x) => descenand_a_string = x.get_string(prefix),
+            None => descenand_a_string = format!("Detector: {} particles\n", self.particle_counter_a)
+        }
+        descenand_a_string
+    }
+
+    fn get_descenand_b_string(&self, prefix: &String) -> String {
+        let descenand_b_string;
+        match &self.descenand_b {
+            Some(x) => descenand_b_string = x.get_string(prefix),
+            None => descenand_b_string = format!("Detector: {} particles\n", self.particle_counter_b)
+        }
+        descenand_b_string
     }
 
     fn get_string(&self, prefix: &String) -> String {
@@ -78,16 +77,16 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
         match self.f_type {
             FilterType::UpDown => {
                 to_return = format!("|UpDown|--Up----{}{}       |--Down--{}",
-                                    self.descenand_a.get_string(&format!("{}       |        ", prefix)),
+                                    self.get_descenand_a_string(&format!("{}       |        ", prefix)),
                                     prefix,
-                                    self.descenand_b.get_string(&format!("{}                ", prefix))
+                                    self.get_descenand_b_string(&format!("{}                ", prefix))
                 );
             },
             FilterType::LeftRight => {
                 to_return = format!("|LeftRight|--Left---{}{}          |--Right--{}",
-                                    self.descenand_a.get_string(&format!("{}          |         ", prefix)),
+                                    self.get_descenand_a_string(&format!("{}          |         ", prefix)),
                                     prefix,
-                                    self.descenand_b.get_string(&format!("{}                    ", prefix))
+                                    self.get_descenand_b_string(&format!("{}                    ", prefix))
                 );
             }
         }
@@ -95,13 +94,13 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
     }
 }
 
-pub struct QCircuit<CN: CircuitNode> {
-    initial_node: CN
+pub struct QCircuit {
+    initial_node: Filter
 }
 
-impl<CN> QCircuit<CN> where CN: CircuitNode {
+impl QCircuit {
 
-    pub fn new(initial_node: CN) -> QCircuit<CN> {
+    pub fn new(initial_node: Filter) -> QCircuit {
         QCircuit{initial_node}
     }
 
