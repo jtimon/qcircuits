@@ -46,3 +46,28 @@ fn test_angle_substraction() {
     a = a - Angle::new(20);
     assert_eq!(Angle::new(350), a);
 }
+
+#[test]
+fn test_angle_between() {
+    assert_eq!(true, Angle::new(0).between(0, 10)); // the initial angle is included (arbitrary)
+    assert_eq!(false, Angle::new(10).between(0, 10)); // the final angle is excluded
+    assert_eq!(true, Angle::new(30).between(20, 40));
+    assert_eq!(false, Angle::new(20).between(30, 40));
+    assert_eq!(false, Angle::new(0).between(90, 180));
+    assert_eq!(true, Angle::new(20).between(40, 30));
+    assert_eq!(true, Angle::new(50).between(40, 30));
+    assert_eq!(false, Angle::new(35).between(40, 30));
+    assert_eq!(true, Angle::new(40).between(40, 30));
+    assert_eq!(false, Angle::new(30).between(40, 30));
+
+    assert_eq!(true, Angle::new(90).between(0, 180));
+    assert_eq!(true, Angle::new(180).between(90, 270));
+    assert_eq!(true, Angle::new(180).between(80, 270));
+    assert_eq!(true, Angle::new(270).between(225, 315));
+    assert_eq!(true, Angle::new(280).between(270, 90));
+    assert_eq!(true, Angle::new(0).between(270, 90));
+    assert_eq!(true, Angle::new(320).between(315, 45));
+    assert_eq!(true, Angle::new(10).between(315, 45));
+    assert_eq!(true, Angle::new(315).between(315, 45));
+    assert_eq!(false, Angle::new(45).between(315, 45));
+}

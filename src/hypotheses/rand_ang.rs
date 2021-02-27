@@ -23,23 +23,19 @@ impl AngleParticle {
     }
 
     fn is_up(&self) -> bool {
-        (self.state.angle < UP + ACCEPTANCE_ANGLE) ||
-            (self.state.angle >= UP + MAX - ACCEPTANCE_ANGLE)
+        self.state.between(UP + MAX - ACCEPTANCE_ANGLE, UP + ACCEPTANCE_ANGLE)
     }
 
     fn is_down(&self) -> bool {
-        (self.state.angle < DOWN + ACCEPTANCE_ANGLE) &&
-            (self.state.angle >= DOWN - ACCEPTANCE_ANGLE)
+        self.state.between(DOWN - ACCEPTANCE_ANGLE, DOWN + ACCEPTANCE_ANGLE)
     }
 
     fn is_left(&self) -> bool {
-        (self.state.angle < LEFT + ACCEPTANCE_ANGLE) &&
-            (self.state.angle >= LEFT - ACCEPTANCE_ANGLE)
+        self.state.between(LEFT - ACCEPTANCE_ANGLE, LEFT + ACCEPTANCE_ANGLE)
     }
 
     fn is_right(&self) -> bool {
-        (self.state.angle < RIGHT + ACCEPTANCE_ANGLE) &&
-            (self.state.angle >= RIGHT - ACCEPTANCE_ANGLE)
+        self.state.between(RIGHT - ACCEPTANCE_ANGLE, RIGHT + ACCEPTANCE_ANGLE)
     }
 }
 

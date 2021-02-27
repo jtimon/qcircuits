@@ -33,6 +33,14 @@ impl Angle {
     pub fn new(angle: u16) -> Angle {
         Angle { angle: reduce_angle(angle) }
     }
+
+    pub fn between(&self, angle_a: u16, angle_b: u16) -> bool {
+        if angle_a <= angle_b {
+            self.angle >= angle_a && self.angle < angle_b
+        } else {
+            self.angle >= angle_a || self.angle < angle_b
+        }
+    }
 }
 
 impl Clone for Angle {
