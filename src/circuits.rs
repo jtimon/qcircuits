@@ -1,6 +1,5 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
-use crate::hypotheses::ran_ang::AngleParticle;
 use crate::particle::Particle;
 
 pub enum FilterType {UpDown, LeftRight}
@@ -34,7 +33,7 @@ impl Filter {
         }
     }
 
-    fn receive_particle(&mut self, particle: &mut dyn Particle) {
+    pub fn receive_particle(&mut self, particle: &mut dyn Particle) {
         match self.f_type {
             FilterType::UpDown => {
                 if particle.observe_updown() {
@@ -94,6 +93,11 @@ impl Filter {
     }
 }
 
+/// A particle source can emit particles towards a CircuitNode (Filter or Detector)
+pub trait ParticleSource {
+    fn emit_particles(&self, filter: &mut Filter, particles: u32);
+}
+
 pub struct QCircuit {
     initial_node: Filter
 }
@@ -104,11 +108,8 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    pub fn run(&mut self, particles: u32) {
-        for _ in 0..particles {
-            let mut p = AngleParticle::new();
-            self.initial_node.receive_particle(&mut p);
-        }
+    pub fn run(&mut self, particle_source: &impl ParticleSource, particles: u32) {
+        particle_source.emit_particles(&mut self.initial_node, particles);
     }
 
     pub fn print(&self) {

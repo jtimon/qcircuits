@@ -18,10 +18,8 @@ pub struct AngleParticle {
 
 impl AngleParticle {
 
-    pub fn new() -> AngleParticle {
-        AngleParticle {
-            state: Angle::new(rand::thread_rng().gen_range(0, MAX)),
-        }
+    pub fn new(angle: u16) -> AngleParticle {
+        AngleParticle { state: Angle::new(angle) }
     }
 
     fn is_up(&self) -> bool {
