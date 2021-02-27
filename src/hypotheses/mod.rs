@@ -4,3 +4,4 @@
 
 // Random angles hypothesis
 pub mod ran_ang;
+pub mod rand_enum;

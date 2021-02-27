@@ -7,7 +7,7 @@ use qcircuits::circuits::{
 
 use qcircuits::sources::{
     AngleParticleSource,
-    AngleParticleSourceDebug,
+    EnumParticleSource,
 };
 
 fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS) {
@@ -121,11 +121,11 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS) {
 }
 
 fn main() {
-    let angle_particle_source = AngleParticleSource{};
-    println!("Random angles hypothesis:\n");
-    test_print_hypothesis(angle_particle_source);
+    let enum_particle_source = EnumParticleSource{};
+    println!("Enum hypothesis (simplest non deterministic hypothesis):\n");
+    test_print_hypothesis(enum_particle_source);
 
-    let angle_particle_source_debug = AngleParticleSourceDebug{};
-    println!("Random angles hypothesis (debug mode, fake randomness at the source):\n");
-    test_print_hypothesis(angle_particle_source_debug);
+    let angle_particle_source = AngleParticleSource{};
+    println!("Random angles hypothesis (non deterministic hypothesis):\n");
+    test_print_hypothesis(angle_particle_source);
 }
