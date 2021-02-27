@@ -6,3 +6,5 @@
 
 pub mod angle;
 pub mod circuits;
+pub mod hypotheses;
+pub mod particle;
