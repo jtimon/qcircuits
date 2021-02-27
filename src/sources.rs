@@ -2,7 +2,7 @@
 use rand::Rng;
 
 use crate::angle::Angle;
-use crate::hypotheses::ran_ang::AngleParticle;
+use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
     Filter,
