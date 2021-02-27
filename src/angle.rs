@@ -1,7 +1,5 @@
 //! Basic struct to handle angles
 
-use rand::Rng;
-
 use std::ops::{Add, Sub};
 
 pub const MAX_ANGLE: u16 = 360;
@@ -34,10 +32,6 @@ impl Angle {
 
     pub fn new(angle: u16) -> Angle {
         Angle { angle: reduce_angle(angle) }
-    }
-
-    pub fn random_angle() -> Angle {
-        Angle { angle: rand::thread_rng().gen_range(0, MAX_ANGLE) }
     }
 }
 

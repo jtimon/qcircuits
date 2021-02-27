@@ -20,7 +20,7 @@ impl AngleParticle {
 
     pub fn new() -> AngleParticle {
         AngleParticle {
-            state: Angle::random_angle(),
+            state: Angle::new(rand::thread_rng().gen_range(0, MAX)),
         }
     }
 
