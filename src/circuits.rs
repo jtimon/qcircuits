@@ -25,29 +25,32 @@ impl Particle {
         }
     }
 
-    pub fn is_up(&self) -> bool {
+    fn is_up(&self) -> bool {
         (self.state.angle < UP + ACCEPTANCE_ANGLE) ||
             (self.state.angle >= UP + MAX - ACCEPTANCE_ANGLE)
     }
 
-    pub fn is_down(&self) -> bool {
+    fn is_down(&self) -> bool {
         (self.state.angle < DOWN + ACCEPTANCE_ANGLE) &&
             (self.state.angle >= DOWN - ACCEPTANCE_ANGLE)
     }
 
-    pub fn is_left(&self) -> bool {
+    fn is_left(&self) -> bool {
         (self.state.angle < LEFT + ACCEPTANCE_ANGLE) &&
             (self.state.angle >= LEFT - ACCEPTANCE_ANGLE)
     }
 
-    pub fn is_right(&self) -> bool {
+    fn is_right(&self) -> bool {
         (self.state.angle < RIGHT + ACCEPTANCE_ANGLE) &&
             (self.state.angle >= RIGHT - ACCEPTANCE_ANGLE)
     }
 
-    pub fn observe_updown(&mut self) {
-        if self.is_up() || self.is_down() {
-            return;
+    // if up returns true, false otherwise
+    pub fn observe_updown(&mut self) -> bool {
+        if self.is_up() {
+            return true;
+        } else if self.is_down() {
+            return false;
         }
         // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
@@ -60,11 +63,15 @@ impl Particle {
         }
         self.state.angle = a;
         assert!(self.state.angle < MAX);
+        self.is_up()
     }
 
-    pub fn observe_leftright(&mut self) {
-        if self.is_left() || self.is_right() {
-            return;
+    // if left returns true, false otherwise
+    pub fn observe_leftright(&mut self) -> bool {
+        if self.is_left() {
+            return true;
+        } else if self.is_right() {
+            return false;
         }
         // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
@@ -74,6 +81,7 @@ impl Particle {
         a = a + ACCEPTANCE_ANGLE;
         self.state.angle = a;
         assert!(self.state.angle < MAX);
+        self.is_left()
     }
 }
 
@@ -128,19 +136,17 @@ impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: Cir
     fn receive_particle(&mut self, particle: &mut Particle) {
         match self.f_type {
             FilterType::UpDown => {
-                particle.observe_updown();
-                if particle.is_up() {
+                if particle.observe_updown() {
                     self.descenand_a.receive_particle(particle);
-                } else if particle.is_down() {
+                } else {
                     self.descenand_b.receive_particle(particle);
                 }
             },
 
             FilterType::LeftRight => {
-                particle.observe_leftright();
-                if particle.is_left() {
+                if particle.observe_leftright() {
                     self.descenand_a.receive_particle(particle);
-                } else if particle.is_right() {
+                } else {
                     self.descenand_b.receive_particle(particle);
                 }
             },
