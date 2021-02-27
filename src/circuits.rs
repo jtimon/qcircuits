@@ -4,6 +4,14 @@ use rand::Rng;
 
 use crate::angle::Angle;
 
+/// A particle can be observed by a Filter or counted by a Detector.
+pub trait Particle {
+    // if up returns true, false otherwise
+    fn observe_updown(&mut self) -> bool;
+    // if left returns true, false otherwise
+    fn observe_leftright(&mut self) -> bool;
+}
+
 pub enum FilterType {UpDown, LeftRight}
 
 const UP: u16 = 0;
@@ -13,14 +21,14 @@ const LEFT: u16 = 270;
 const MAX: u16 = 360;
 const ACCEPTANCE_ANGLE: u16 = 45;
 
-pub struct Particle {
+pub struct AngleParticle {
     state: Angle
 }
 
-impl Particle {
+impl AngleParticle {
 
-    pub fn new() -> Particle {
-        Particle {
+    pub fn new() -> AngleParticle {
+        AngleParticle {
             state: Angle::random_angle(),
         }
     }
@@ -44,9 +52,11 @@ impl Particle {
         (self.state.angle < RIGHT + ACCEPTANCE_ANGLE) &&
             (self.state.angle >= RIGHT - ACCEPTANCE_ANGLE)
     }
+}
 
-    // if up returns true, false otherwise
-    pub fn observe_updown(&mut self) -> bool {
+impl Particle for AngleParticle {
+
+    fn observe_updown(&mut self) -> bool {
         if self.is_up() {
             return true;
         } else if self.is_down() {
@@ -66,8 +76,7 @@ impl Particle {
         self.is_up()
     }
 
-    // if left returns true, false otherwise
-    pub fn observe_leftright(&mut self) -> bool {
+    fn observe_leftright(&mut self) -> bool {
         if self.is_left() {
             return true;
         } else if self.is_right() {
@@ -87,7 +96,7 @@ impl Particle {
 
 /// CircuitNode process particles, they can be filters or detectors
 pub trait CircuitNode {
-    fn receive_particle(&mut self, particle: &mut Particle);
+    fn receive_particle(&mut self, particle: &mut dyn Particle);
     fn get_string(&self, prefix: &String) -> String;
 }
 
@@ -108,7 +117,7 @@ impl Detector {
 }
 
 impl CircuitNode for Detector {
-    fn receive_particle(&mut self, _particle: &mut Particle) {
+    fn receive_particle(&mut self, _particle: &mut dyn Particle) {
         self.particle_counter = self.particle_counter + 1;
     }
 
@@ -133,7 +142,7 @@ impl<CNA, CNB> Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
 
 impl<CNA, CNB> CircuitNode for Filter<CNA, CNB> where CNA: CircuitNode, CNB: CircuitNode {
 
-    fn receive_particle(&mut self, particle: &mut Particle) {
+    fn receive_particle(&mut self, particle: &mut dyn Particle) {
         match self.f_type {
             FilterType::UpDown => {
                 if particle.observe_updown() {
@@ -187,7 +196,7 @@ impl<CN> QCircuit<CN> where CN: CircuitNode {
 
     pub fn run(&mut self, particles: u32) {
         for _ in 0..particles {
-            let mut p = Particle::new();
+            let mut p = AngleParticle::new();
             self.initial_node.receive_particle(&mut p);
         }
     }
