@@ -25,6 +25,17 @@ impl Filter {
         Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
     }
 
+    pub fn reset_counters(&mut self) {
+        self.particle_counter_a = 0;
+        self.particle_counter_b = 0;
+        if let &mut Some(ref mut x) = &mut self.descenand_a {
+            x.reset_counters();
+        }
+        if let &mut Some(ref mut x) = &mut self.descenand_b {
+            x.reset_counters();
+        }
+    }
+
     fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
         self.particle_counter_a += 1;
         if let &mut Some(ref mut x) = &mut self.descenand_a {
