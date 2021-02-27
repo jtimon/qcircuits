@@ -10,6 +10,20 @@ fn main() {
     c_detector_only.run(1000);
     c_detector_only.print();
 
+    let mut c_updown_single = QCircuit::new(
+        Filter::new(FilterType::UpDown,
+                    Detector::new(),
+                    Detector::new()));
+    c_updown_single.run(100000);
+    c_updown_single.print();
+
+    let mut c_leftright_single = QCircuit::new(
+        Filter::new(FilterType::LeftRight,
+                    Detector::new(),
+                    Detector::new()));
+    c_leftright_single.run(100000);
+    c_leftright_single.print();
+
     let mut c_updown_series = QCircuit::new(
         Filter::new(FilterType::UpDown,
                     Filter::new(FilterType::UpDown,
