@@ -36,6 +36,19 @@ impl Filter {
         }
     }
 
+    pub fn get_results(&self) -> Vec<u32> {
+        let mut vec = Vec::new();
+        match &self.descenand_a {
+            Some(x) => vec.append(&mut x.get_results()),
+            None => vec.push(self.particle_counter_a),
+        }
+        match &self.descenand_b {
+            Some(x) => vec.append(&mut x.get_results()),
+            None => vec.push(self.particle_counter_b),
+        }
+        vec
+    }
+
     fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
         self.particle_counter_a += 1;
         if let &mut Some(ref mut x) = &mut self.descenand_a {
@@ -130,6 +143,7 @@ impl QCircuit {
     }
 
     pub fn print(&self) {
+        println!("Results: {:?}", self.initial_node.get_results());
         print!("Source--{}\n", self.initial_node.get_string(&String::from("        ")));
     }
 }
