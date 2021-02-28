@@ -142,8 +142,50 @@ impl QCircuit {
         particle_source.emit_particles(&mut self.initial_node, particles);
     }
 
+    fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) -> bool {
+
+        hypothesis_a.emit_particles(&mut self.initial_node, particles);
+        let results_a = self.initial_node.get_results();
+        self.initial_node.reset_counters();
+
+        hypothesis_b.emit_particles(&mut self.initial_node, particles);
+        let results_b = self.initial_node.get_results();
+        let mut difference = Vec::new();
+        let mut percentage_a = Vec::new();
+        let mut percentage_b = Vec::new();
+        let mut percentage_difference = Vec::new();
+        assert!(results_a.len() == results_b.len());
+        for i in 0..results_a.len() {
+            percentage_a.push((results_a[i] as f32) * 100.0 / particles as f32);
+            percentage_b.push((results_b[i] as f32) * 100.0 / particles as f32);
+            if results_a[i] > results_b[i] {
+                difference.push(results_a[i] - results_b[i]);
+                percentage_difference.push(percentage_a[i] - percentage_b[i]);
+            } else {
+                difference.push(results_b[i] - results_a[i]);
+                percentage_difference.push(percentage_b[i] - percentage_a[i]);
+            }
+        }
+        println!("Results a:             {:?}", results_a);
+        println!("Results b:             {:?}", results_b);
+        println!("Difference:            {:?}\n", difference);
+        println!("percentage_a:          {:?}", percentage_a);
+        println!("percentage_b:          {:?}", percentage_b);
+        println!("Percentage difference: {:?}\n", percentage_difference);
+        self.print();
+        for perc_diff in percentage_difference {
+            if perc_diff > error {
+                return false
+            }
+        }
+        true
+    }
+
+    pub fn assert_compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
+        assert!(self.compare(hypothesis_a, hypothesis_b, particles, error));
+    }
+
     pub fn print(&self) {
-        println!("Results: {:?}", self.initial_node.get_results());
         print!("Source--{}\n", self.initial_node.get_string(&String::from("        ")));
     }
 }

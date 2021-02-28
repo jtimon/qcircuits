@@ -10,20 +10,14 @@ use qcircuits::sources::{
     EnumParticleSource,
 };
 
-fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u32) {
-    let mut c_updown_single = QCircuit::new(
-        Filter::new(FilterType::UpDown,
-                    None,
-                    None));
-    c_updown_single.run(&particle_source, repetitions);
-    c_updown_single.print();
+fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_source_a: PSA, particle_source_b: PSB, repetitions: u32) {
 
-    let mut c_leftright_single = QCircuit::new(
-        Filter::new(FilterType::LeftRight,
-                    None,
-                    None));
-    c_leftright_single.run(&particle_source, repetitions);
-    c_leftright_single.print();
+    let error = 0.7;
+    let mut c_updown_single = QCircuit::new(Filter::new(FilterType::UpDown, None, None));
+    c_updown_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
+
+    let mut c_leftright_single = QCircuit::new(Filter::new(FilterType::LeftRight, None, None));
+    c_leftright_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_updown_series = QCircuit::new(
         Filter::new(FilterType::UpDown,
@@ -33,8 +27,7 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u
                                                                         None))),
                                               None))),
                     None));
-    c_updown_series.run(&particle_source, repetitions);
-    c_updown_series.print();
+    c_updown_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_leftright_series = QCircuit::new(
         Filter::new(FilterType::LeftRight,
@@ -44,8 +37,7 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u
                                                                         None))),
                                               None))),
                     None));
-    c_leftright_series.run(&particle_source, repetitions);
-    c_leftright_series.print();
+    c_leftright_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_tree2 = QCircuit::new(
         Filter::new(FilterType::LeftRight,
@@ -56,8 +48,7 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u
                                               None,
                                               None)))
         ));
-    c_tree2.run(&particle_source, repetitions);
-    c_tree2.print();
+    c_tree2.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_tree3 = QCircuit::new(
         Filter::new(FilterType::LeftRight,
@@ -78,8 +69,7 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u
                                                                         None)))
                     ))),
         ));
-    c_tree3.run(&particle_source, repetitions);
-    c_tree3.print();
+    c_tree3.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_tree4 = QCircuit::new(
         Filter::new(FilterType::LeftRight,
@@ -116,14 +106,16 @@ fn test_print_hypothesis<PS: ParticleSource>(particle_source: PS, repetitions: u
                                                                                                   None))))))
                     ))),
         ));
-    c_tree4.run(&particle_source, repetitions);
-    c_tree4.print();
+    c_tree4.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 }
 
 fn main() {
-    println!("Enum hypothesis (simplest non deterministic hypothesis):\n");
-    test_print_hypothesis(EnumParticleSource{}, 100000);
 
-    println!("Random angles hypothesis (non deterministic hypothesis):\n");
-    test_print_hypothesis(AngleParticleSource{}, 100000);
+    println!("\nContemplated hypotheses:\n");
+    println!("- Enum hypothesis (simplest non deterministic hypothesis)");
+    println!("- Random angles hypothesis (non deterministic hypothesis)");
+    println!("");
+
+    println!("Compare Enum and Angle hypotheses (both non deterministic hypothesis):\n");
+    compare_print_hypothesis(EnumParticleSource{}, AngleParticleSource{}, 100000);
 }
