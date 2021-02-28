@@ -5,6 +5,7 @@
 //! experiments.
 
 pub mod angle;
+pub mod cfactory;
 pub mod circuits;
 pub mod hypotheses;
 pub mod sources;
