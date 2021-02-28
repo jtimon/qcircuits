@@ -12,6 +12,7 @@ pub trait Particle {
 }
 
 /// Filters send particles to either descenand_a or descenand_b
+#[derive(Clone)]
 pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,

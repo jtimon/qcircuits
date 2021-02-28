@@ -6,13 +6,6 @@ use crate::circuits::{
     QCircuit,
 };
 
-fn opposite_filtertype(filtertype: &FilterType) -> FilterType {
-    match filtertype {
-        FilterType::UpDown => FilterType::LeftRight,
-        FilterType::LeftRight => FilterType::UpDown,
-    }
-}
-
 pub struct QCircuitFactory;
 
 impl QCircuitFactory {
@@ -28,79 +21,19 @@ impl QCircuitFactory {
         QCircuit::new(filter)
     }
 
-    // TODO generalize tree factory with depth argument
-    pub fn tree2(filtertype: FilterType) -> QCircuit {
-        let opposite_filtertype = opposite_filtertype(&filtertype);
-        QCircuit::new(
-            Filter::new(filtertype,
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  None,
-                                                  None))),
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  None,
-                                                  None)))
-            ))
-    }
-
-    pub fn tree3(filtertype: FilterType) -> QCircuit {
-        let opposite_filtertype = opposite_filtertype(&filtertype);
-        QCircuit::new(
-            Filter::new(filtertype,
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            None,
-                                                                            None))),
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            None,
-                                                                            None)))
-                        ))),
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            None,
-                                                                            None))),
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            None,
-                                                                            None)))
-                        ))),
-            ))
-    }
-
-    pub fn tree4(filtertype: FilterType) -> QCircuit {
-        let opposite_filtertype = opposite_filtertype(&filtertype);
-        QCircuit::new(
-            Filter::new(filtertype,
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None)))))),
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))))))
-                        ))),
-                        Some(Box::new(Filter::new(opposite_filtertype,
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None)))))),
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(opposite_filtertype,
-                                                                                                      None,
-                                                                                                      None))))))
-                        ))),
-            ))
+    pub fn tree(depth: u8, filtertype: FilterType) -> QCircuit {
+        let mut filter = Filter::new(filtertype, None, None);
+        assert!(depth > 0);
+        let mut depth_count = depth - 1;
+        let mut ft = filtertype;
+        while depth_count > 0 {
+            match ft {
+                FilterType::UpDown => ft = FilterType::LeftRight,
+                FilterType::LeftRight => ft = FilterType::UpDown
+            }
+            filter = Filter::new(ft, Some(Box::new(filter.clone())), Some(Box::new(filter)));
+            depth_count -= 1;
+        }
+        QCircuit::new(filter)
     }
 }

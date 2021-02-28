@@ -24,14 +24,17 @@ fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_s
     let mut c_leftright_series = QCircuitFactory::series(3, FilterType::LeftRight);
     c_leftright_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree2 = QCircuitFactory::tree2(FilterType::UpDown);
+    let mut c_tree2 = QCircuitFactory::tree(2, FilterType::UpDown);
     c_tree2.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree3 = QCircuitFactory::tree3(FilterType::LeftRight);
+    let mut c_tree3 = QCircuitFactory::tree(3, FilterType::LeftRight);
     c_tree3.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree4 = QCircuitFactory::tree4(FilterType::UpDown);
+    let mut c_tree4 = QCircuitFactory::tree(4, FilterType::UpDown);
     c_tree4.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
+
+    let mut c_tree5 = QCircuitFactory::tree(5, FilterType::UpDown);
+    c_tree5.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 }
 
 fn main() {
