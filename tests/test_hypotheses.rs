@@ -12,10 +12,10 @@ use qcircuits::sources::{
 fn test_enum_angle_single() {
     let repetitions = 100000;
     let error = 0.7;
-    let mut c_updown_single = QCircuitFactory::single(FilterType::UpDown);
+    let mut c_updown_single = QCircuitFactory::series(1, FilterType::UpDown);
     c_updown_single.assert_compare(&EnumParticleSource{}, &AngleParticleSource{}, repetitions, error);
 
-    let mut c_leftright_single = QCircuitFactory::single(FilterType::LeftRight);
+    let mut c_leftright_single = QCircuitFactory::series(1, FilterType::LeftRight);
     c_leftright_single.assert_compare(&EnumParticleSource{}, &AngleParticleSource{}, repetitions, error);
 }
 
@@ -23,10 +23,10 @@ fn test_enum_angle_single() {
 fn test_enum_angle_series() {
     let repetitions = 100000;
     let error = 0.7;
-    let mut c_updown_series = QCircuitFactory::series(FilterType::UpDown);
+    let mut c_updown_series = QCircuitFactory::series(3, FilterType::UpDown);
     c_updown_series.assert_compare(&EnumParticleSource{}, &AngleParticleSource{}, repetitions, error);
 
-    let mut c_leftright_series = QCircuitFactory::series(FilterType::LeftRight);
+    let mut c_leftright_series = QCircuitFactory::series(3, FilterType::LeftRight);
     c_leftright_series.assert_compare(&EnumParticleSource{}, &AngleParticleSource{}, repetitions, error);
 }
 

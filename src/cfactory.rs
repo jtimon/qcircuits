@@ -17,19 +17,15 @@ pub struct QCircuitFactory;
 
 impl QCircuitFactory {
 
-    pub fn single(filtertype: FilterType) -> QCircuit {
-        QCircuit::new(Filter::new(filtertype, None, None))
-    }
-
-    pub fn series(filtertype: FilterType) -> QCircuit {
-        QCircuit::new(
-            Filter::new(filtertype,
-                        Some(Box::new(Filter::new(filtertype,
-                                                  Some(Box::new(Filter::new(filtertype,
-                                                                            None,
-                                                                            None))),
-                                                  None))),
-                        None))
+    pub fn series(depth: u8, filtertype: FilterType) -> QCircuit {
+        let mut filter = Filter::new(filtertype, None, None);
+        assert!(depth > 0);
+        let mut depth_count = depth - 1;
+        while depth_count > 0 {
+            filter = Filter::new(filtertype, Some(Box::new(filter)), None);
+            depth_count -= 1;
+        }
+        QCircuit::new(filter)
     }
 
     // TODO generalize tree factory with depth argument

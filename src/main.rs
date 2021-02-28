@@ -12,16 +12,16 @@ use qcircuits::sources::{
 fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_source_a: PSA, particle_source_b: PSB, repetitions: u32) {
 
     let error = 0.8;
-    let mut c_updown_single = QCircuitFactory::single(FilterType::UpDown);
+    let mut c_updown_single = QCircuitFactory::series(1, FilterType::UpDown);
     c_updown_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_leftright_single = QCircuitFactory::single(FilterType::LeftRight);
+    let mut c_leftright_single = QCircuitFactory::series(1, FilterType::LeftRight);
     c_leftright_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_updown_series = QCircuitFactory::series(FilterType::UpDown);
+    let mut c_updown_series = QCircuitFactory::series(3, FilterType::UpDown);
     c_updown_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_leftright_series = QCircuitFactory::series(FilterType::LeftRight);
+    let mut c_leftright_series = QCircuitFactory::series(3, FilterType::LeftRight);
     c_leftright_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
     let mut c_tree2 = QCircuitFactory::tree2(FilterType::UpDown);
