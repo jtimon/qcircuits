@@ -1,5 +1,6 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
+#[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
 /// A particle can be observed by a Filter or counted by a Detector.

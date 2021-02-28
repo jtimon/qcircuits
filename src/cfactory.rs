@@ -6,35 +6,26 @@ use crate::circuits::{
     QCircuit,
 };
 
+fn opposite_filtertype(filtertype: &FilterType) -> FilterType {
+    match filtertype {
+        FilterType::UpDown => FilterType::LeftRight,
+        FilterType::LeftRight => FilterType::UpDown,
+    }
+}
+
 pub struct QCircuitFactory;
 
 impl QCircuitFactory {
 
-    // TODO generalize updown/leftright factory with FilterType argument
-    pub fn single_updown() -> QCircuit {
-        QCircuit::new(Filter::new(FilterType::UpDown, None, None))
+    pub fn single(filtertype: FilterType) -> QCircuit {
+        QCircuit::new(Filter::new(filtertype, None, None))
     }
 
-    pub fn single_leftright() -> QCircuit {
-        QCircuit::new(Filter::new(FilterType::LeftRight, None, None))
-    }
-
-    pub fn series_updown() -> QCircuit {
+    pub fn series(filtertype: FilterType) -> QCircuit {
         QCircuit::new(
-            Filter::new(FilterType::UpDown,
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                            None,
-                                                                            None))),
-                                                  None))),
-                        None))
-    }
-
-    pub fn series_leftright() -> QCircuit {
-        QCircuit::new(
-            Filter::new(FilterType::LeftRight,
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
+            Filter::new(filtertype,
+                        Some(Box::new(Filter::new(filtertype,
+                                                  Some(Box::new(Filter::new(filtertype,
                                                                             None,
                                                                             None))),
                                                   None))),
@@ -42,144 +33,75 @@ impl QCircuitFactory {
     }
 
     // TODO generalize tree factory with depth argument
-    pub fn tree2_updown() -> QCircuit {
+    pub fn tree2(filtertype: FilterType) -> QCircuit {
+        let opposite_filtertype = opposite_filtertype(&filtertype);
         QCircuit::new(
-            Filter::new(FilterType::UpDown,
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
+            Filter::new(filtertype,
+                        Some(Box::new(Filter::new(opposite_filtertype,
                                                   None,
                                                   None))),
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
+                        Some(Box::new(Filter::new(opposite_filtertype,
                                                   None,
                                                   None)))
             ))
     }
 
-    pub fn tree2_leftright() -> QCircuit {
+    pub fn tree3(filtertype: FilterType) -> QCircuit {
+        let opposite_filtertype = opposite_filtertype(&filtertype);
         QCircuit::new(
-            Filter::new(FilterType::LeftRight,
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  None,
-                                                  None))),
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  None,
-                                                  None)))
-            ))
-    }
-
-    pub fn tree3_updown() -> QCircuit {
-        QCircuit::new(
-            Filter::new(FilterType::UpDown,
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
+            Filter::new(filtertype,
+                        Some(Box::new(Filter::new(opposite_filtertype,
+                                                  Some(Box::new(Filter::new(filtertype,
                                                                             None,
                                                                             None))),
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
+                                                  Some(Box::new(Filter::new(filtertype,
                                                                             None,
                                                                             None)))
                         ))),
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
+                        Some(Box::new(Filter::new(opposite_filtertype,
+                                                  Some(Box::new(Filter::new(filtertype,
                                                                             None,
                                                                             None))),
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
+                                                  Some(Box::new(Filter::new(filtertype,
                                                                             None,
                                                                             None)))
                         ))),
             ))
     }
 
-    pub fn tree3_leftright() -> QCircuit {
+    pub fn tree4(filtertype: FilterType) -> QCircuit {
+        let opposite_filtertype = opposite_filtertype(&filtertype);
         QCircuit::new(
-            Filter::new(FilterType::LeftRight,
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            None,
-                                                                            None))),
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            None,
-                                                                            None)))
-                        ))),
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            None,
-                                                                            None))),
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            None,
-                                                                            None)))
-                        ))),
-            ))
-    }
-
-    pub fn tree4_updown() -> QCircuit {
-        QCircuit::new(
-            Filter::new(FilterType::UpDown,
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+            Filter::new(filtertype,
+                        Some(Box::new(Filter::new(opposite_filtertype,
+                                                  Some(Box::new(Filter::new(filtertype,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))),
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None)))))),
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                                                  Some(Box::new(Filter::new(filtertype,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))),
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))))))
                         ))),
-                        Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                        Some(Box::new(Filter::new(opposite_filtertype,
+                                                  Some(Box::new(Filter::new(filtertype,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))),
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None)))))),
-                                                  Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
+                                                  Some(Box::new(Filter::new(filtertype,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))),
-                                                                            Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                                                      None,
-                                                                                                      None))))))
-                        ))),
-            ))
-    }
-
-    pub fn tree4_leftright() -> QCircuit {
-        QCircuit::new(
-            Filter::new(FilterType::LeftRight,
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None)))))),
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None))))))
-                        ))),
-                        Some(Box::new(Filter::new(FilterType::UpDown,
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None)))))),
-                                                  Some(Box::new(Filter::new(FilterType::LeftRight,
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
-                                                                                                      None,
-                                                                                                      None))),
-                                                                            Some(Box::new(Filter::new(FilterType::UpDown,
+                                                                            Some(Box::new(Filter::new(opposite_filtertype,
                                                                                                       None,
                                                                                                       None))))))
                         ))),

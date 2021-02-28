@@ -1,6 +1,7 @@
 
 use qcircuits::cfactory::QCircuitFactory;
 use qcircuits::circuits::{
+    FilterType,
     ParticleSource,
 };
 use qcircuits::sources::{
@@ -11,25 +12,25 @@ use qcircuits::sources::{
 fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_source_a: PSA, particle_source_b: PSB, repetitions: u32) {
 
     let error = 0.8;
-    let mut c_updown_single = QCircuitFactory::single_updown();
+    let mut c_updown_single = QCircuitFactory::single(FilterType::UpDown);
     c_updown_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_leftright_single = QCircuitFactory::single_leftright();
+    let mut c_leftright_single = QCircuitFactory::single(FilterType::LeftRight);
     c_leftright_single.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_updown_series = QCircuitFactory::series_updown();
+    let mut c_updown_series = QCircuitFactory::series(FilterType::UpDown);
     c_updown_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_leftright_series = QCircuitFactory::series_leftright();
+    let mut c_leftright_series = QCircuitFactory::series(FilterType::LeftRight);
     c_leftright_series.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree2 = QCircuitFactory::tree2_updown();
+    let mut c_tree2 = QCircuitFactory::tree2(FilterType::UpDown);
     c_tree2.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree3 = QCircuitFactory::tree3_leftright();
+    let mut c_tree3 = QCircuitFactory::tree3(FilterType::LeftRight);
     c_tree3.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 
-    let mut c_tree4 = QCircuitFactory::tree4_updown();
+    let mut c_tree4 = QCircuitFactory::tree4(FilterType::UpDown);
     c_tree4.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 }
 
