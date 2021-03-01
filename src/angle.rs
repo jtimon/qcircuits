@@ -4,21 +4,13 @@ use std::ops::{Add, Sub};
 
 pub const MAX_ANGLE: u16 = 360;
 
-fn reduce_angle(angle: u16) -> u16 {
-    let mut ang = angle;
-    while ang >= MAX_ANGLE {
-        ang -= MAX_ANGLE;
-    }
-    ang
-}
-
 fn substract_angles(angle_a: u16, angle_b: u16) -> u16 {
 
     let ang;
     if angle_a > angle_b {
-       ang = reduce_angle(angle_a - angle_b);
+       ang = (angle_a - angle_b) % MAX_ANGLE;
     } else {
-       ang = reduce_angle(angle_a + MAX_ANGLE - angle_b);
+       ang = (angle_a + MAX_ANGLE - angle_b) % MAX_ANGLE;
     }
     ang
 }
@@ -30,8 +22,8 @@ pub struct Angle {
 
 impl Angle {
 
-    pub fn new(angle: u16) -> Angle {
-        Angle { angle: reduce_angle(angle) }
+    pub const fn new(angle: u16) -> Angle {
+        Angle { angle: angle % MAX_ANGLE }
     }
 
     pub fn between(&self, angle_a: u16, angle_b: u16) -> bool {
@@ -53,7 +45,7 @@ impl Add<u16> for Angle {
     type Output = Angle;
 
     fn add(self, _rhs: u16) -> Angle {
-        Angle { angle : reduce_angle(self.angle + _rhs)}
+        Angle { angle : (self.angle + _rhs) % MAX_ANGLE}
     }
 }
 
@@ -61,7 +53,7 @@ impl Add<Angle> for Angle {
     type Output = Angle;
 
     fn add(self, _rhs: Angle) -> Angle {
-        Angle { angle : reduce_angle(self.angle + _rhs.angle)}
+        Angle { angle : (self.angle + _rhs.angle) % MAX_ANGLE}
     }
 }
 
