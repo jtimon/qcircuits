@@ -37,7 +37,7 @@ fn test_enum_det_angle_single() {
 #[test]
 fn test_enum_angle_series() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.5;
     let mut c_updown_series = QCircuitFactory::series(3, FilterType::UpDown);
     c_updown_series.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
 
@@ -59,7 +59,7 @@ fn test_enum_det_angle_series() {
 #[test]
 fn test_enum_angle_tree2() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.6;
     let mut c_tree_up = QCircuitFactory::tree(2, FilterType::UpDown);
     c_tree_up.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
 
@@ -81,7 +81,7 @@ fn test_enum_det_angle_tree2() {
 #[test]
 fn test_enum_angle_tree3() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.5;
     let mut c_tree_up = QCircuitFactory::tree(3, FilterType::UpDown);
     c_tree_up.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
 
@@ -103,7 +103,7 @@ fn test_enum_det_angle_tree3() {
 #[test]
 fn test_enum_angle_tree4() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.4;
 
     let mut c_tree_up = QCircuitFactory::tree(4, FilterType::UpDown);
     c_tree_up.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
@@ -115,7 +115,7 @@ fn test_enum_angle_tree4() {
 #[test]
 fn test_enum_angle_tree5() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.3;
 
     let mut c_tree_up = QCircuitFactory::tree(5, FilterType::UpDown);
     c_tree_up.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
@@ -127,7 +127,7 @@ fn test_enum_angle_tree5() {
 #[test]
 fn test_enum_angle_tree10() {
     let repetitions = 100000;
-    let error = 0.7;
+    let error = 0.1;
 
     let mut c_tree_up = QCircuitFactory::tree(10, FilterType::UpDown);
     c_tree_up.assert_compare(&mut EnumParticleSource{}, &mut AngleParticleSource{}, repetitions, error);
