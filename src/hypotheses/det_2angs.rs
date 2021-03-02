@@ -17,19 +17,27 @@ impl DetTwoAngleParticle {
     pub fn new(angle_updown: u16, angle_leftright: u16) -> DetTwoAngleParticle {
         DetTwoAngleParticle { angle_updown: Angle::new(angle_updown), angle_leftright: Angle::new(angle_leftright) }
     }
+}
+
+impl Particle for DetTwoAngleParticle {
 
     fn is_up(&self) -> bool {
         self.angle_updown.between(UP + MAX_ANGLE - ACCEPTANCE_ANGLE, UP + ACCEPTANCE_ANGLE)
     }
 
+    fn is_down(&self) -> bool {
+        self.angle_updown.between(DOWN - ACCEPTANCE_ANGLE, DOWN + ACCEPTANCE_ANGLE)
+    }
+
     fn is_left(&self) -> bool {
         self.angle_leftright.between(LEFT - ACCEPTANCE_ANGLE, LEFT + ACCEPTANCE_ANGLE)
     }
-}
 
-impl Particle for DetTwoAngleParticle {
+    fn is_right(&self) -> bool {
+        self.angle_leftright.between(RIGHT - ACCEPTANCE_ANGLE, RIGHT + ACCEPTANCE_ANGLE)
+    }
 
-    fn observe_updown(&mut self) -> bool {
+    fn observe_updown(&mut self) {
         // up_right_right or down_left_left
         if self.angle_updown.between(RIGHT - ACCEPT_TRANS_ANGLE, RIGHT) || self.angle_updown.between(LEFT - ACCEPT_TRANS_ANGLE, LEFT) {
             self.angle_updown = self.angle_updown.clone() - TRANSFORM_ANGLE;
@@ -40,10 +48,9 @@ impl Particle for DetTwoAngleParticle {
 
         // self.angle_leftright = self.angle_leftright.clone() + self.angle_updown.clone() + TRANSFORM_ANGLE;
         self.angle_leftright = self.angle_leftright.clone() + TRANSFORM_ANGLE;
-        self.is_up()
     }
 
-    fn observe_leftright(&mut self) -> bool {
+    fn observe_leftright(&mut self) {
         // up_up_left or down_down_right
         if self.angle_leftright.between(UP + MAX_ANGLE - ACCEPT_TRANS_ANGLE, UP) || self.angle_leftright.between(DOWN - ACCEPT_TRANS_ANGLE, DOWN) {
             self.angle_leftright = self.angle_leftright.clone() - TRANSFORM_ANGLE;
@@ -54,6 +61,5 @@ impl Particle for DetTwoAngleParticle {
 
         // self.angle_updown = self.angle_updown.clone() + self.angle_leftright.clone() + TRANSFORM_ANGLE;
         self.angle_updown = self.angle_updown.clone() + TRANSFORM_ANGLE;
-        self.is_left()
     }
 }

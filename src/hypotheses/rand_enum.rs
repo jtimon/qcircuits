@@ -4,6 +4,7 @@ use rand::Rng;
 
 use crate::circuits::Particle;
 
+#[derive(PartialEq)]
 pub enum ParticleState { Up, Down, Left, Right }
 
 pub struct EnumParticle {
@@ -39,19 +40,31 @@ impl EnumParticle {
 
 impl Particle for EnumParticle {
 
-    fn observe_updown(&mut self) -> bool {
-        match self.state {
-            ParticleState::Up => true,
-            ParticleState::Down => false,
-            _ => self.set_random_updown()
+    fn is_up(&self) -> bool {
+        self.state == ParticleState::Up
+    }
+
+    fn is_down(&self) -> bool {
+        self.state == ParticleState::Down
+    }
+
+    fn is_left(&self) -> bool {
+        self.state == ParticleState::Left
+    }
+
+    fn is_right(&self) -> bool {
+        self.state == ParticleState::Right
+    }
+
+    fn observe_updown(&mut self) {
+        if self.state != ParticleState::Up && self.state != ParticleState::Down {
+            self.set_random_updown();
         }
     }
 
-    fn observe_leftright(&mut self) -> bool {
-        match self.state {
-            ParticleState::Left => true,
-            ParticleState::Right => false,
-            _ => self.set_random_leftright()
+    fn observe_leftright(&mut self) {
+        if self.state != ParticleState::Left && self.state != ParticleState::Right {
+            self.set_random_leftright();
         }
     }
 }

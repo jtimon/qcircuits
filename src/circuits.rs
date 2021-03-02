@@ -5,10 +5,19 @@ pub enum FilterType {UpDown, LeftRight}
 
 /// A particle can be observed by a Filter or counted by a Detector.
 pub trait Particle {
-    // if up returns true, false otherwise
-    fn observe_updown(&mut self) -> bool;
-    // if left returns true, false otherwise
-    fn observe_leftright(&mut self) -> bool;
+    /// if up returns true, false otherwise
+    fn is_up(&self) -> bool;
+    /// if down returns true, false otherwise
+    fn is_down(&self) -> bool;
+    /// if left returns true, false otherwise
+    fn is_left(&self) -> bool;
+    /// if right returns true, false otherwise
+    fn is_right(&self) -> bool;
+
+    /// Is called once every time a particle passes through an UpDown Filter
+    fn observe_updown(&mut self);
+    /// Is called once every time a particle passes through a LeftRight Filter
+    fn observe_leftright(&mut self);
 }
 
 /// Filters send particles to either descenand_a or descenand_b
@@ -66,19 +75,22 @@ impl Filter {
     }
 
     pub fn receive_particle(&mut self, particle: &mut dyn Particle) {
+        // Note particles can't be lost in the filter
         match self.f_type {
             FilterType::UpDown => {
-                if particle.observe_updown() {
+                particle.observe_updown();
+                if particle.is_up() {
                     self.transfer_to_a(particle);
-                } else {
+                } else if particle.is_down() {
                     self.transfer_to_b(particle);
                 }
             },
 
             FilterType::LeftRight => {
-                if particle.observe_leftright() {
+                particle.observe_leftright();
+                if particle.is_left() {
                     self.transfer_to_a(particle);
-                } else {
+                } else if particle.is_right() {
                     self.transfer_to_b(particle);
                 }
             },
@@ -157,9 +169,15 @@ impl QCircuit {
         let mut percentage_b = Vec::new();
         let mut percentage_difference = Vec::new();
         assert!(results_a.len() == results_b.len());
+        let mut particles_a = 0;
+        let mut particles_b = 0;
         for i in 0..results_a.len() {
-            percentage_a.push((results_a[i] as f32) * 100.0 / particles as f32);
-            percentage_b.push((results_b[i] as f32) * 100.0 / particles as f32);
+            particles_a += results_a[i];
+            particles_b += results_a[i];
+        }
+        for i in 0..results_a.len() {
+            percentage_a.push((results_a[i] as f32) * 100.0 / particles_a as f32);
+            percentage_b.push((results_b[i] as f32) * 100.0 / particles_b as f32);
             if results_a[i] > results_b[i] {
                 difference.push(results_a[i] - results_b[i]);
                 percentage_difference.push(percentage_a[i] - percentage_b[i]);

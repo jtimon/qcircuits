@@ -16,6 +16,9 @@ impl AngleParticle {
     pub fn new(angle: u16) -> AngleParticle {
         AngleParticle { state: Angle::new(angle) }
     }
+}
+
+impl Particle for AngleParticle {
 
     fn is_up(&self) -> bool {
         self.state.between(UP + MAX_ANGLE - ACCEPTANCE_ANGLE, UP + ACCEPTANCE_ANGLE)
@@ -32,15 +35,10 @@ impl AngleParticle {
     fn is_right(&self) -> bool {
         self.state.between(RIGHT - ACCEPTANCE_ANGLE, RIGHT + ACCEPTANCE_ANGLE)
     }
-}
 
-impl Particle for AngleParticle {
-
-    fn observe_updown(&mut self) -> bool {
-        if self.is_up() {
-            return true;
-        } else if self.is_down() {
-            return false;
+    fn observe_updown(&mut self) {
+        if self.is_up() || self.is_down() {
+            return;
         }
         // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
@@ -53,14 +51,11 @@ impl Particle for AngleParticle {
         }
         self.state.angle = a;
         assert!(self.state.angle < MAX_ANGLE);
-        self.is_up()
     }
 
-    fn observe_leftright(&mut self) -> bool {
-        if self.is_left() {
-            return true;
-        } else if self.is_right() {
-            return false;
+    fn observe_leftright(&mut self) {
+        if self.is_left() || self.is_right() {
+            return;
         }
         // 50% chance of going either way
         let mut a = rand::thread_rng().gen_range(0, ACCEPTANCE_ANGLE * 4);
@@ -70,6 +65,5 @@ impl Particle for AngleParticle {
         a = a + ACCEPTANCE_ANGLE;
         self.state.angle = a;
         assert!(self.state.angle < MAX_ANGLE);
-        self.is_left()
     }
 }
