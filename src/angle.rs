@@ -3,6 +3,10 @@
 use std::ops::{Add, Sub};
 
 pub const MAX_ANGLE: u16 = 360;
+pub const UP: u16 = 0;
+pub const RIGHT: u16 = MAX_ANGLE / 4;
+pub const DOWN: u16 = MAX_ANGLE / 2;
+pub const LEFT: u16 = 3 * (MAX_ANGLE / 4);
 
 fn substract_angles(angle_a: u16, angle_b: u16) -> u16 {
 

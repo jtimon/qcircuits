@@ -2,13 +2,9 @@
 
 use rand::Rng;
 
-use crate::angle::{Angle, MAX_ANGLE};
+use crate::angle::{Angle, MAX_ANGLE, UP, RIGHT, DOWN, LEFT};
 use crate::circuits::Particle;
 
-const UP: u16 = 0;
-const RIGHT: u16 = 90;
-const DOWN: u16 = 180;
-const LEFT: u16 = 270;
 const ACCEPTANCE_ANGLE: u16 = 45;
 
 pub struct AngleParticle {
