@@ -2,6 +2,7 @@
 use rand::Rng;
 
 use crate::angle::{Angle, MAX_ANGLE};
+use crate::hypotheses::det_2angs::DetTwoAngleParticle;
 use crate::hypotheses::det_ang::DetAngleParticle;
 use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
@@ -62,6 +63,42 @@ impl ParticleSource for DetAngleParticleSourceDebug {
             let mut p = DetAngleParticle::new(angle.angle);
             filter.receive_particle(&mut p);
             angle = angle + 1;
+        }
+    }
+}
+
+pub struct DetTwoAngleParticleSource;
+
+impl ParticleSource for DetTwoAngleParticleSource {
+    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+        for _ in 0..particles {
+            let mut p = DetTwoAngleParticle::new(
+                rand::thread_rng().gen_range(0, MAX_ANGLE),
+                rand::thread_rng().gen_range(0, MAX_ANGLE));
+            filter.receive_particle(&mut p);
+        }
+    }
+}
+
+pub struct DetTwoAngleParticleSourceDebug;
+
+impl ParticleSource for DetTwoAngleParticleSourceDebug {
+    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+        let mut angle_a : u16 = 0;
+        let mut angle_b : u16 = 0;
+        for _ in 0..particles {
+            let mut p = DetTwoAngleParticle::new(angle_a, angle_b);
+            filter.receive_particle(&mut p);
+            if angle_a == 359 {
+                angle_a = 0;
+                if angle_b == 359 {
+                    angle_b = 0;
+                } else {
+                    angle_b = angle_b + 1;
+                }
+            } else {
+                angle_a = angle_a + 1;
+            }
         }
     }
 }
