@@ -2,14 +2,13 @@
 
 use rand::Rng;
 
-use crate::angle::Angle;
+use crate::angle::{Angle, MAX_ANGLE};
 use crate::circuits::Particle;
 
 const UP: u16 = 0;
 const RIGHT: u16 = 90;
 const DOWN: u16 = 180;
 const LEFT: u16 = 270;
-const MAX: u16 = 360;
 const ACCEPTANCE_ANGLE: u16 = 45;
 
 pub struct AngleParticle {
@@ -23,7 +22,7 @@ impl AngleParticle {
     }
 
     fn is_up(&self) -> bool {
-        self.state.between(UP + MAX - ACCEPTANCE_ANGLE, UP + ACCEPTANCE_ANGLE)
+        self.state.between(UP + MAX_ANGLE - ACCEPTANCE_ANGLE, UP + ACCEPTANCE_ANGLE)
     }
 
     fn is_down(&self) -> bool {
@@ -57,7 +56,7 @@ impl Particle for AngleParticle {
             a = a + ACCEPTANCE_ANGLE;
         }
         self.state.angle = a;
-        assert!(self.state.angle < MAX);
+        assert!(self.state.angle < MAX_ANGLE);
         self.is_up()
     }
 
@@ -74,7 +73,7 @@ impl Particle for AngleParticle {
         }
         a = a + ACCEPTANCE_ANGLE;
         self.state.angle = a;
-        assert!(self.state.angle < MAX);
+        assert!(self.state.angle < MAX_ANGLE);
         self.is_left()
     }
 }

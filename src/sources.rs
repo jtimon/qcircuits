@@ -1,15 +1,13 @@
 
 use rand::Rng;
 
-use crate::angle::Angle;
+use crate::angle::{Angle, MAX_ANGLE};
 use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
     Filter,
     ParticleSource,
 };
-
-const MAX_ANGLE: u16 = 360;
 
 pub struct EnumParticleSource;
 
