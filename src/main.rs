@@ -40,6 +40,9 @@ fn compare_print_hypothesis<PSA: ParticleSource, PSB: ParticleSource>(particle_s
 
     let mut c_tree5 = QCircuitFactory::tree(5, FilterType::UpDown);
     c_tree5.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
+
+    let mut c_tree6 = QCircuitFactory::tree(6, FilterType::UpDown);
+    c_tree6.assert_compare(&particle_source_a, &particle_source_b, repetitions, error);
 }
 
 fn main() {
