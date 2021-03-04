@@ -111,24 +111,15 @@ A: Yes. It's already implemented.
 
 Q: Considering examples 5 and 6 a tree of depth of 3, how deep can this project go with a deterministic hypothesis?
 
-A: Depth 6.
+A: Any depth using DetBitsParticleSource that has as many bits as the depth considered.
 
 ** Question 3:
 
-Q: If we knew the maximum depth of the deepest experiment that's going
-to be done, can we produce a deterministic hypothesis that will
-satisfy out conditions?
-
-A: I think it should be obvious that the answer is yes, but I haven't proven it yet.
-It's also quite likely I'm just missing something about quantum mechanics.
-
-** Question 4:
-
 Q: what is the maximum depth that has been tried in real life experiments?
 
-TODO I don't know.
+TODO I don't know. I expect this number to be quite high so that people gave up or something.
 
-** Question 5:
+** Question 4:
 
 Q: Can we produce deterministic hypotheses that are seemingly equivalent to the non deterministic ones?
 In other words: Can the randomness be set from the beginning for each particle and the filters be purely deterministic?
@@ -149,10 +140,11 @@ never be falsified using the scientific method:
 "A deterministic model exists to explain any seemingly non deterministic observations".
 
 In fact, infinite models exist equivalent to any model of any universe
-we can think of, deterministic or not. But for now that's beyond the
+we can think of, seemingly deterministic or not. But for now that's beyond the
 scope of this project.
 
-Please, somebody tell me where I'm wrong.
+It's also quite likely I'm just missing something about quantum mechanics or math.
+Please, somebody tell me where I'm wrong or what am I missing.
 
 * References
 

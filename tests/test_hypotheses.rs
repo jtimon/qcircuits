@@ -7,6 +7,7 @@ use qcircuits::circuits::FilterType;
 use qcircuits::sources::{
     AngleParticleSource,
     DetAngleParticleSourceDebug,
+    DetBitsParticleSource,
     DetTwoAngleParticleSourceDebug,
     EnumParticleSource,
 };
@@ -169,4 +170,51 @@ fn test_enum_det_2angle_tree6() {
 
     let mut c_tree_left = QCircuitFactory::tree(6, FilterType::LeftRight);
     c_tree_left.assert_compare(&EnumParticleSource{}, &DetTwoAngleParticleSourceDebug{}, repetitions, error);
+}
+
+#[test]
+fn test_enum_bits6_tree6() {
+    let repetitions = 100000;
+    let error = 0.2;
+
+    let mut c_tree_up = QCircuitFactory::tree(6, FilterType::UpDown);
+    c_tree_up.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(6), repetitions, error);
+
+    let mut c_tree_left = QCircuitFactory::tree(6, FilterType::LeftRight);
+    c_tree_left.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(6), repetitions, error);
+}
+
+#[test]
+fn test_enum_bits10_tree10() {
+    let repetitions = 100000;
+    let error = 0.2;
+
+    let mut c_tree_up = QCircuitFactory::tree(10, FilterType::UpDown);
+    c_tree_up.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(10), repetitions, error);
+
+    let mut c_tree_left = QCircuitFactory::tree(10, FilterType::LeftRight);
+    c_tree_left.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(10), repetitions, error);
+}
+
+#[test]
+fn test_enum_bits15_series() {
+    let repetitions = 100000;
+    let error = 0.7;
+    let mut c_updown_series = QCircuitFactory::series(3, FilterType::UpDown);
+    c_updown_series.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(15), repetitions, error);
+
+    let mut c_leftright_series = QCircuitFactory::series(3, FilterType::LeftRight);
+    c_leftright_series.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(15), repetitions, error);
+}
+
+#[test]
+fn test_enum_bits15_tree15() {
+    let repetitions = 100000;
+    let error = 0.2;
+
+    let mut c_tree_up = QCircuitFactory::tree(15, FilterType::UpDown);
+    c_tree_up.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(15), repetitions, error);
+
+    let mut c_tree_left = QCircuitFactory::tree(15, FilterType::LeftRight);
+    c_tree_left.assert_compare(&EnumParticleSource{}, &DetBitsParticleSource::new(15), repetitions, error);
 }

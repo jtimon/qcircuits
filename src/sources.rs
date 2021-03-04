@@ -4,6 +4,7 @@ use rand::Rng;
 use crate::angle::{Angle, MAX_ANGLE};
 use crate::hypotheses::det_2angs::DetTwoAngleParticle;
 use crate::hypotheses::det_ang::DetAngleParticle;
+use crate::hypotheses::det_bits::DetBitParticle;
 use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
@@ -99,6 +100,38 @@ impl ParticleSource for DetTwoAngleParticleSourceDebug {
             } else {
                 angle_a = angle_a + 1;
             }
+        }
+    }
+}
+
+pub struct DetBitsParticleSource
+{
+    bit_count: usize
+}
+
+impl DetBitsParticleSource {
+
+    pub fn new(bit_count: usize) -> DetBitsParticleSource {
+        DetBitsParticleSource { bit_count }
+    }
+}
+
+impl ParticleSource for DetBitsParticleSource {
+    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+        for _ in 0..particles {
+            let mut v: Vec<bool> = Vec::new();
+            for _ in 0..self.bit_count + 1 {
+                v.push(
+                    if rand::thread_rng().gen_range(0, 2) > 0 {
+                        true
+                    } else {
+                        false
+                    }
+                );
+            }
+            let is_updown = v.remove(v.len() - 1);
+            let mut p = DetBitParticle::new(v, is_updown);
+            filter.receive_particle(&mut p);
         }
     }
 }
