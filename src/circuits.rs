@@ -5,14 +5,6 @@ use std::thread;
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
-/// A particle can be observed by a Filter or counted by a Detector.
-pub trait Particle {
-    // if up returns true, false otherwise
-    fn observe_updown(&mut self) -> bool;
-    // if left returns true, false otherwise
-    fn observe_leftright(&mut self) -> bool;
-}
-
 /// Filters send particles to either descenand_a or descenand_b
 #[derive(Clone)]
 pub struct Filter {
@@ -40,42 +32,6 @@ impl Filter {
             None => vec.push(self.particle_counter_b),
         }
         vec
-    }
-
-    fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenand_a {
-            x.receive_particle(particle);
-        } else {
-            self.particle_counter_a += 1;
-        }
-    }
-
-    fn transfer_to_b(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenand_b {
-            x.receive_particle(particle);
-        } else {
-            self.particle_counter_b += 1;
-        }
-    }
-
-    pub fn receive_particle(&mut self, particle: &mut dyn Particle) {
-        match self.f_type {
-            FilterType::UpDown => {
-                if particle.observe_updown() {
-                    self.transfer_to_a(particle);
-                } else {
-                    self.transfer_to_b(particle);
-                }
-            },
-
-            FilterType::LeftRight => {
-                if particle.observe_leftright() {
-                    self.transfer_to_a(particle);
-                } else {
-                    self.transfer_to_b(particle);
-                }
-            },
-        }
     }
 
     fn get_descenand_a_string(&self, prefix: &String) -> String {
@@ -122,6 +78,52 @@ impl Filter {
     }
 }
 
+/// A particle can be observed by a Filter or counted by a Detector.
+pub trait Particle {
+    // if up returns true, false otherwise
+    fn observe_updown(&mut self) -> bool;
+    // if left returns true, false otherwise
+    fn observe_leftright(&mut self) -> bool;
+
+    fn transfer_to_a(&mut self, filter: &mut Filter) {
+        if let &mut Some(ref mut x) = &mut filter.descenand_a {
+            self.pass_filter(x);
+        } else {
+            filter.particle_counter_a += 1;
+        }
+    }
+
+    fn transfer_to_b(&mut self, filter: &mut Filter) {
+        if let &mut Some(ref mut x) = &mut filter.descenand_b {
+            self.pass_filter(x);
+        } else {
+            filter.particle_counter_b += 1;
+        }
+    }
+
+    fn pass_filter(&mut self, filter: &mut Filter) {
+
+        match filter.f_type {
+            FilterType::UpDown => {
+                if self.observe_updown() {
+                    self.transfer_to_a(filter);
+                } else {
+                    self.transfer_to_b(filter);
+                }
+            },
+
+            FilterType::LeftRight => {
+                if self.observe_leftright() {
+                    self.transfer_to_a(filter);
+                } else {
+                    self.transfer_to_b(filter);
+                }
+            },
+        }
+    }
+}
+
+
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
 pub trait ParticleSource : Copy + Send {
     fn get_particle(&mut self) -> Box<dyn Particle>;
@@ -130,7 +132,7 @@ pub trait ParticleSource : Copy + Send {
         let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = self.get_particle();
-            filter.receive_particle(&mut *p);
+            p.pass_filter(&mut filter);
         }
         filter
     }
