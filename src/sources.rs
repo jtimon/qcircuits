@@ -9,6 +9,7 @@ use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
     Filter,
+    Particle,
     ParticleSource,
 };
 
@@ -28,7 +29,7 @@ impl ParticleSource for EnumParticleSource {
             } else {
                 p = EnumParticle::new(ParticleState::Right);
             }
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
         }
     }
 }
@@ -39,7 +40,7 @@ impl ParticleSource for AngleParticleSource {
     fn emit_particles(&self, filter: &mut Filter, particles: u32){
         for _ in 0..particles {
             let mut p = AngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE));
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
         }
     }
 }
@@ -50,7 +51,7 @@ impl ParticleSource for DetAngleParticleSource {
     fn emit_particles(&self, filter: &mut Filter, particles: u32){
         for _ in 0..particles {
             let mut p = DetAngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE));
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
         }
     }
 }
@@ -62,7 +63,7 @@ impl ParticleSource for DetAngleParticleSourceDebug {
         let mut angle = Angle::new(0);
         for _ in 0..particles {
             let mut p = DetAngleParticle::new(angle.angle);
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
             angle = angle + 1;
         }
     }
@@ -76,7 +77,7 @@ impl ParticleSource for DetTwoAngleParticleSource {
             let mut p = DetTwoAngleParticle::new(
                 rand::thread_rng().gen_range(0, MAX_ANGLE),
                 rand::thread_rng().gen_range(0, MAX_ANGLE));
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
         }
     }
 }
@@ -89,7 +90,7 @@ impl ParticleSource for DetTwoAngleParticleSourceDebug {
         let mut angle_b : u16 = 0;
         for _ in 0..particles {
             let mut p = DetTwoAngleParticle::new(angle_a, angle_b);
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
             if angle_a == 359 {
                 angle_a = 0;
                 if angle_b == 359 {
@@ -131,7 +132,7 @@ impl ParticleSource for DetBitsParticleSource {
             }
             let is_updown = v.remove(v.len() - 1);
             let mut p = DetBitParticle::new(v, is_updown);
-            filter.receive_particle(&mut p);
+            p.pass_filter(filter);
         }
     }
 }
