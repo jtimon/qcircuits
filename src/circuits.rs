@@ -1,27 +1,43 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
+use std::sync::{Arc, RwLock};
+use std::thread;
+
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
+pub const MAX_THREADS: u32 = 1000;
+
 /// Filters send particles to either descenand_a or descenand_b
-#[derive(Clone)]
 pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,
     descenand_b: Option<Box<Filter>>,
-    particle_counter_a: u32,
-    particle_counter_b: u32
+    particle_counter_a: RwLock<u32>,
+    particle_counter_b: RwLock<u32>
+}
+
+impl Clone for Filter {
+    fn clone(&self) -> Filter {
+        Filter {
+            f_type: self.f_type,
+            descenand_a: self.descenand_a.clone(),
+            descenand_b: self.descenand_b.clone(),
+            particle_counter_a: RwLock::new(*self.particle_counter_a.read().unwrap()),
+            particle_counter_b: RwLock::new(*self.particle_counter_b.read().unwrap())
+        }
+    }
 }
 
 impl Filter {
 
     pub fn new(f_type: FilterType, descenand_a: Option<Box<Filter>>, descenand_b: Option<Box<Filter>>) -> Filter {
-        Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
+        Filter{f_type, descenand_a, descenand_b, particle_counter_a: RwLock::new(0), particle_counter_b: RwLock::new(0)}
     }
 
     pub fn reset_counters(&mut self) {
-        self.particle_counter_a = 0;
-        self.particle_counter_b = 0;
+        *self.particle_counter_a.write().unwrap() = 0;
+        *self.particle_counter_b.write().unwrap() = 0;
         if let &mut Some(ref mut x) = &mut self.descenand_a {
             x.reset_counters();
         }
@@ -34,11 +50,11 @@ impl Filter {
         let mut vec = Vec::new();
         match &self.descenand_a {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(self.particle_counter_a),
+            None => vec.push(*self.particle_counter_a.read().unwrap()),
         }
         match &self.descenand_b {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(self.particle_counter_b),
+            None => vec.push(*self.particle_counter_b.read().unwrap()),
         }
         vec
     }
@@ -47,7 +63,7 @@ impl Filter {
         let descenand_a_string;
         match &self.descenand_a {
             Some(x) => descenand_a_string = x.get_string(prefix),
-            None => descenand_a_string = format!("Detector: {} particles\n", self.particle_counter_a)
+            None => descenand_a_string = format!("Detector: {} particles\n", *self.particle_counter_a.read().unwrap())
         }
         descenand_a_string
     }
@@ -56,7 +72,7 @@ impl Filter {
         let descenand_b_string;
         match &self.descenand_b {
             Some(x) => descenand_b_string = x.get_string(prefix),
-            None => descenand_b_string = format!("Detector: {} particles\n", self.particle_counter_b)
+            None => descenand_b_string = format!("Detector: {} particles\n", *self.particle_counter_b.read().unwrap())
         }
         descenand_b_string
     }
@@ -90,23 +106,23 @@ pub trait Particle {
     // if left returns true, false otherwise
     fn observe_leftright(&mut self) -> bool;
 
-    fn transfer_to_a(&mut self, filter: &mut Filter) {
-        if let &mut Some(ref mut x) = &mut filter.descenand_a {
+    fn transfer_to_a(&mut self, filter: &Filter) {
+        if let &Some(ref x) = &filter.descenand_a {
             self.pass_filter(x);
         } else {
-            filter.particle_counter_a += 1;
+            *filter.particle_counter_a.write().unwrap() += 1;
         }
     }
 
-    fn transfer_to_b(&mut self, filter: &mut Filter) {
-        if let &mut Some(ref mut x) = &mut filter.descenand_b {
+    fn transfer_to_b(&mut self, filter: &Filter) {
+        if let &Some(ref x) = &filter.descenand_b {
             self.pass_filter(x);
         } else {
-            filter.particle_counter_b += 1;
+            *filter.particle_counter_b.write().unwrap() += 1;
         }
     }
 
-    fn pass_filter(&mut self, filter: &mut Filter) {
+    fn pass_filter(&mut self, filter: &Filter) {
 
         match filter.f_type {
             FilterType::UpDown => {
@@ -130,35 +146,48 @@ pub trait Particle {
 
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
 pub trait ParticleSource {
-    fn get_particle(&mut self) -> Box<dyn Particle>;
+    fn get_particle(&mut self) -> Box<dyn Particle + Send>;
 
-    fn emit_particles(&mut self, filter: &mut Filter, particles: u32) {
-        for _ in 0..particles {
-            let mut p = self.get_particle();
-            p.pass_filter(filter);
+    fn emit_particles(&mut self, filter: &Arc<Filter>, particles: u32) {
+        let mut particles = particles;
+        while particles > 0 {
+            let iter = std::cmp::min(particles, MAX_THREADS);
+            particles -= iter;
+
+            let mut handles = vec![];
+            for _ in 0..iter {
+                let fc = Arc::clone(&filter);
+                let mut p = self.get_particle();
+                handles.push(thread::spawn(move || {
+                    p.pass_filter(&*fc);
+                }));
+            }
+            for handle in handles {
+                handle.join().unwrap();
+            }
         }
     }
 }
 
 pub struct QCircuit {
-    initial_node: Filter
+    initial_node: Arc<Filter>
 }
 
 impl QCircuit {
 
     pub fn new(initial_node: Filter) -> QCircuit {
-        QCircuit{initial_node}
+        QCircuit{initial_node: Arc::new(initial_node)}
     }
 
     pub fn run(&mut self, particle_source: &mut impl ParticleSource, particles: u32) {
-        particle_source.emit_particles(&mut self.initial_node, particles);
+        particle_source.emit_particles(&self.initial_node, particles);
     }
 
     fn compare(&mut self, hypothesis_a: &mut impl ParticleSource, hypothesis_b: &mut impl ParticleSource, particles: u32, error: f32) -> bool {
 
         hypothesis_a.emit_particles(&mut self.initial_node, particles);
         let results_a = self.initial_node.get_results();
-        self.initial_node.reset_counters();
+        Arc::get_mut(&mut self.initial_node).unwrap().reset_counters();
 
         hypothesis_b.emit_particles(&mut self.initial_node, particles);
         let results_b = self.initial_node.get_results();
