@@ -52,16 +52,18 @@ impl Filter {
     }
 
     fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
-        self.particle_counter_a += 1;
         if let &mut Some(ref mut x) = &mut self.descenand_a {
             x.receive_particle(particle);
+        } else {
+            self.particle_counter_a += 1;
         }
     }
 
     fn transfer_to_b(&mut self, particle: &mut dyn Particle) {
-        self.particle_counter_b += 1;
         if let &mut Some(ref mut x) = &mut self.descenand_b {
             x.receive_particle(particle);
+        } else {
+            self.particle_counter_b += 1;
         }
     }
 
