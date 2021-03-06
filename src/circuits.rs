@@ -128,10 +128,16 @@ pub trait Particle {
     }
 }
 
-
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
 pub trait ParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32);
+    fn get_particle(&mut self) -> Box<dyn Particle>;
+
+    fn emit_particles(&mut self, filter: &mut Filter, particles: u32) {
+        for _ in 0..particles {
+            let mut p = self.get_particle();
+            p.pass_filter(filter);
+        }
+    }
 }
 
 pub struct QCircuit {
@@ -144,11 +150,11 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    pub fn run(&mut self, particle_source: &impl ParticleSource, particles: u32) {
+    pub fn run(&mut self, particle_source: &mut impl ParticleSource, particles: u32) {
         particle_source.emit_particles(&mut self.initial_node, particles);
     }
 
-    fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) -> bool {
+    fn compare(&mut self, hypothesis_a: &mut impl ParticleSource, hypothesis_b: &mut impl ParticleSource, particles: u32, error: f32) -> bool {
 
         hypothesis_a.emit_particles(&mut self.initial_node, particles);
         let results_a = self.initial_node.get_results();
@@ -187,7 +193,7 @@ impl QCircuit {
         true
     }
 
-    pub fn assert_compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
+    pub fn assert_compare(&mut self, hypothesis_a: &mut impl ParticleSource, hypothesis_b: &mut impl ParticleSource, particles: u32, error: f32) {
         assert!(self.compare(hypothesis_a, hypothesis_b, particles, error));
     }
 
