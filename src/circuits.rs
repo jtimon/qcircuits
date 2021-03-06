@@ -1,20 +1,21 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::thread;
 
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
-pub const MAX_THREADS: u32 = 1000;
+pub const MAX_THREADS: u32 = 100;
 
 /// Filters send particles to either descenand_a or descenand_b
 pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,
     descenand_b: Option<Box<Filter>>,
-    particle_counter_a: RwLock<u32>,
-    particle_counter_b: RwLock<u32>
+    particle_counter_a: AtomicU32,
+    particle_counter_b: AtomicU32
 }
 
 impl Clone for Filter {
@@ -23,8 +24,8 @@ impl Clone for Filter {
             f_type: self.f_type,
             descenand_a: self.descenand_a.clone(),
             descenand_b: self.descenand_b.clone(),
-            particle_counter_a: RwLock::new(*self.particle_counter_a.read().unwrap()),
-            particle_counter_b: RwLock::new(*self.particle_counter_b.read().unwrap())
+            particle_counter_a: AtomicU32::new(self.particle_counter_a.load(Ordering::Relaxed)),
+            particle_counter_b: AtomicU32::new(self.particle_counter_b.load(Ordering::Relaxed))
         }
     }
 }
@@ -32,12 +33,12 @@ impl Clone for Filter {
 impl Filter {
 
     pub fn new(f_type: FilterType, descenand_a: Option<Box<Filter>>, descenand_b: Option<Box<Filter>>) -> Filter {
-        Filter{f_type, descenand_a, descenand_b, particle_counter_a: RwLock::new(0), particle_counter_b: RwLock::new(0)}
+        Filter{f_type, descenand_a, descenand_b, particle_counter_a: AtomicU32::new(0), particle_counter_b: AtomicU32::new(0)}
     }
 
     pub fn reset_counters(&mut self) {
-        *self.particle_counter_a.write().unwrap() = 0;
-        *self.particle_counter_b.write().unwrap() = 0;
+        self.particle_counter_a = AtomicU32::new(0);
+        self.particle_counter_b = AtomicU32::new(0);
         if let &mut Some(ref mut x) = &mut self.descenand_a {
             x.reset_counters();
         }
@@ -50,11 +51,11 @@ impl Filter {
         let mut vec = Vec::new();
         match &self.descenand_a {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(*self.particle_counter_a.read().unwrap()),
+            None => vec.push(self.particle_counter_a.load(Ordering::Relaxed)),
         }
         match &self.descenand_b {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(*self.particle_counter_b.read().unwrap()),
+            None => vec.push(self.particle_counter_b.load(Ordering::Relaxed)),
         }
         vec
     }
@@ -63,7 +64,7 @@ impl Filter {
         let descenand_a_string;
         match &self.descenand_a {
             Some(x) => descenand_a_string = x.get_string(prefix),
-            None => descenand_a_string = format!("Detector: {} particles\n", *self.particle_counter_a.read().unwrap())
+            None => descenand_a_string = format!("Detector: {} particles\n", self.particle_counter_a.load(Ordering::Relaxed))
         }
         descenand_a_string
     }
@@ -72,7 +73,7 @@ impl Filter {
         let descenand_b_string;
         match &self.descenand_b {
             Some(x) => descenand_b_string = x.get_string(prefix),
-            None => descenand_b_string = format!("Detector: {} particles\n", *self.particle_counter_b.read().unwrap())
+            None => descenand_b_string = format!("Detector: {} particles\n", self.particle_counter_b.load(Ordering::Relaxed))
         }
         descenand_b_string
     }
@@ -110,7 +111,7 @@ pub trait Particle {
         if let &Some(ref x) = &filter.descenand_a {
             self.pass_filter(x);
         } else {
-            *filter.particle_counter_a.write().unwrap() += 1;
+            filter.particle_counter_a.fetch_add(1, Ordering::Relaxed);
         }
     }
 
@@ -118,7 +119,7 @@ pub trait Particle {
         if let &Some(ref x) = &filter.descenand_b {
             self.pass_filter(x);
         } else {
-            *filter.particle_counter_b.write().unwrap() += 1;
+            filter.particle_counter_b.fetch_add(1, Ordering::Relaxed);
         }
     }
 
