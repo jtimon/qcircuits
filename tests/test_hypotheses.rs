@@ -55,13 +55,13 @@ fn test_enum_angle_series3() {
 #[test]
 fn test_enum_det_angle_series3() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_series(EnumParticleSource{}, DetAngleParticleSourceDebug{}, 1, repetitions, 0.5);
+    test_series(EnumParticleSource{}, DetAngleParticleSourceDebug::new(), 1, repetitions, 0.5);
 }
 
 #[test]
 fn test_enum_det_2angle_series3() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_series(EnumParticleSource{}, DetTwoAngleParticleSourceDebug{}, 1, repetitions, 0.8);
+    test_series(EnumParticleSource{}, DetTwoAngleParticleSourceDebug::new(), 1, repetitions, 0.9);
 }
 
 #[test]
@@ -97,31 +97,31 @@ fn test_enum_angle_tree10() {
 #[test]
 fn test_enum_det_angle_tree2() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_tree(EnumParticleSource{}, DetAngleParticleSourceDebug{}, 2, repetitions, 0.6);
+    test_tree(EnumParticleSource{}, DetAngleParticleSourceDebug::new(), 2, repetitions, 0.6);
 }
 
 #[test]
 fn test_enum_det_angle_tree3() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_tree(EnumParticleSource{}, DetAngleParticleSourceDebug{}, 3, repetitions, 0.7);
+    test_tree(EnumParticleSource{}, DetAngleParticleSourceDebug::new(), 3, repetitions, 0.7);
 }
 
 #[test]
 fn test_enum_det_2angle_tree4() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug{}, 4, repetitions, 0.5);
+    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug::new(), 4, repetitions, 0.5);
 }
 
 #[test]
 fn test_enum_det_2angle_tree5() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug{}, 5, repetitions, 0.5);
+    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug::new(), 5, repetitions, 0.5);
 }
 
 #[test]
 fn test_enum_det_2angle_tree6() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug{}, 6, repetitions, 0.5);
+    test_tree(EnumParticleSource{}, DetTwoAngleParticleSourceDebug::new(), 6, repetitions, 0.5);
 }
 
 #[test]

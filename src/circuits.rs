@@ -124,7 +124,16 @@ impl Filter {
 
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
 pub trait ParticleSource : Copy + Send {
-    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter;
+    fn get_particle(&mut self) -> Box<dyn Particle>;
+
+    fn emit_particles(&mut self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
+        for _ in 0..particles {
+            let mut p = self.get_particle();
+            filter.receive_particle(&mut *p);
+        }
+        filter
+    }
 }
 
 pub struct QCircuit {
@@ -144,11 +153,11 @@ impl QCircuit {
 
         let filter_a = self.initial_node.clone();
         let handle_a = thread::spawn(move || {
-            hypothesis_a.emit_particles(&filter_a, particles)
+            hypothesis_a.clone().emit_particles(&filter_a, particles)
         });
         let filter_b = self.initial_node.clone();
         let handle_b = thread::spawn(move || {
-            hypothesis_b.emit_particles(&filter_b, particles)
+            hypothesis_b.clone().emit_particles(&filter_b, particles)
         });
 
         let filter_a = handle_a.join().unwrap();
