@@ -135,7 +135,7 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32) -> Vec<f32> {
+    fn compare(&self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32) -> Vec<f32> {
 
         let filter_a = hypothesis_a.emit_particles(&self.initial_node, particles);
         let results_a = filter_a.get_results();
@@ -170,7 +170,7 @@ impl QCircuit {
         percentage_difference
     }
 
-    pub fn assert_compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
+    pub fn assert_compare(&self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
         let percentage_difference = self.compare(hypothesis_a, hypothesis_b, particles);
         for perc_diff in percentage_difference {
             assert!(perc_diff < error);
