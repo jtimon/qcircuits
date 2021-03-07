@@ -12,6 +12,7 @@ use crate::circuits::{
     ParticleSource,
 };
 
+#[derive(Copy, Clone)]
 pub struct EnumParticleSource;
 
 impl ParticleSource for EnumParticleSource {
@@ -35,6 +36,7 @@ impl ParticleSource for EnumParticleSource {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct AngleParticleSource;
 
 impl ParticleSource for AngleParticleSource {
@@ -48,6 +50,7 @@ impl ParticleSource for AngleParticleSource {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct DetAngleParticleSource;
 
 impl ParticleSource for DetAngleParticleSource {
@@ -61,6 +64,7 @@ impl ParticleSource for DetAngleParticleSource {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct DetAngleParticleSourceDebug;
 
 impl ParticleSource for DetAngleParticleSourceDebug {
@@ -76,6 +80,7 @@ impl ParticleSource for DetAngleParticleSourceDebug {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct DetTwoAngleParticleSource;
 
 impl ParticleSource for DetTwoAngleParticleSource {
@@ -91,6 +96,7 @@ impl ParticleSource for DetTwoAngleParticleSource {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct DetTwoAngleParticleSourceDebug;
 
 impl ParticleSource for DetTwoAngleParticleSourceDebug {
@@ -116,6 +122,7 @@ impl ParticleSource for DetTwoAngleParticleSourceDebug {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct DetBitsParticleSource
 {
     bit_count: usize

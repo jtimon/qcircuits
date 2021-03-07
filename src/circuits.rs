@@ -1,5 +1,7 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
+use std::thread;
+
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
@@ -121,7 +123,7 @@ impl Filter {
 }
 
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
-pub trait ParticleSource {
+pub trait ParticleSource : Copy + Send {
     fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter;
 }
 
@@ -135,12 +137,24 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    fn compare(&self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32) -> Vec<f32> {
+    fn compare(&self,
+               hypothesis_a: impl ParticleSource + 'static,
+               hypothesis_b: impl ParticleSource + 'static,
+               particles: u32) -> Vec<f32> {
 
-        let filter_a = hypothesis_a.emit_particles(&self.initial_node, particles);
+        let filter_a = self.initial_node.clone();
+        let handle_a = thread::spawn(move || {
+            hypothesis_a.emit_particles(&filter_a, particles)
+        });
+        let filter_b = self.initial_node.clone();
+        let handle_b = thread::spawn(move || {
+            hypothesis_b.emit_particles(&filter_b, particles)
+        });
+
+        let filter_a = handle_a.join().unwrap();
         let results_a = filter_a.get_results();
 
-        let filter_b = hypothesis_b.emit_particles(&self.initial_node, particles);
+        let filter_b = handle_b.join().unwrap();
         let results_b = filter_b.get_results();
 
         let mut difference = Vec::new();
@@ -170,7 +184,11 @@ impl QCircuit {
         percentage_difference
     }
 
-    pub fn assert_compare(&self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
+    pub fn assert_compare(&self,
+                          hypothesis_a: impl ParticleSource + 'static,
+                          hypothesis_b: impl ParticleSource + 'static,
+                          particles: u32, error: f32) {
+
         let percentage_difference = self.compare(hypothesis_a, hypothesis_b, particles);
         for perc_diff in percentage_difference {
             assert!(perc_diff < error);
