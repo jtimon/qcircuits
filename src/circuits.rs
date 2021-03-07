@@ -146,10 +146,6 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    pub fn run(&mut self, particle_source: &impl ParticleSource, particles: u32) {
-        particle_source.emit_particles(&mut self.initial_node, particles);
-    }
-
     fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) -> bool {
 
         hypothesis_a.emit_particles(&mut self.initial_node, particles);
