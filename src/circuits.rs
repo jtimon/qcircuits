@@ -146,7 +146,7 @@ impl QCircuit {
         QCircuit{initial_node}
     }
 
-    fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) -> bool {
+    fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32) -> Vec<f32> {
 
         hypothesis_a.emit_particles(&mut self.initial_node, particles);
         let results_a = self.initial_node.get_results();
@@ -154,6 +154,7 @@ impl QCircuit {
 
         hypothesis_b.emit_particles(&mut self.initial_node, particles);
         let results_b = self.initial_node.get_results();
+
         let mut difference = Vec::new();
         let mut percentage_a = Vec::new();
         let mut percentage_b = Vec::new();
@@ -170,22 +171,21 @@ impl QCircuit {
                 percentage_difference.push(percentage_b[i] - percentage_a[i]);
             }
         }
+
+        self.initial_node.print();
         println!("Results a:             {:?}", results_a);
         println!("Results b:             {:?}", results_b);
-        println!("Difference:            {:?}\n", difference);
         println!("percentage_a:          {:?}", percentage_a);
         println!("percentage_b:          {:?}", percentage_b);
+        println!("Difference:            {:?}", difference);
         println!("Percentage difference: {:?}\n", percentage_difference);
-        self.initial_node.print();
-        for perc_diff in percentage_difference {
-            if perc_diff > error {
-                return false
-            }
-        }
-        true
+        percentage_difference
     }
 
     pub fn assert_compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
-        assert!(self.compare(hypothesis_a, hypothesis_b, particles, error));
+        let percentage_difference = self.compare(hypothesis_a, hypothesis_b, particles);
+        for perc_diff in percentage_difference {
+            assert!(perc_diff < error);
+        }
     }
 }
