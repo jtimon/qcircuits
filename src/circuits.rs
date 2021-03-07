@@ -27,17 +27,6 @@ impl Filter {
         Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
     }
 
-    pub fn reset_counters(&mut self) {
-        self.particle_counter_a = 0;
-        self.particle_counter_b = 0;
-        if let &mut Some(ref mut x) = &mut self.descenand_a {
-            x.reset_counters();
-        }
-        if let &mut Some(ref mut x) = &mut self.descenand_b {
-            x.reset_counters();
-        }
-    }
-
     pub fn get_results(&self) -> Vec<u32> {
         let mut vec = Vec::new();
         match &self.descenand_a {
@@ -133,7 +122,7 @@ impl Filter {
 
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
 pub trait ParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32);
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter;
 }
 
 pub struct QCircuit {
@@ -148,12 +137,11 @@ impl QCircuit {
 
     fn compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32) -> Vec<f32> {
 
-        hypothesis_a.emit_particles(&mut self.initial_node, particles);
-        let results_a = self.initial_node.get_results();
-        self.initial_node.reset_counters();
+        let filter_a = hypothesis_a.emit_particles(&self.initial_node, particles);
+        let results_a = filter_a.get_results();
 
-        hypothesis_b.emit_particles(&mut self.initial_node, particles);
-        let results_b = self.initial_node.get_results();
+        let filter_b = hypothesis_b.emit_particles(&self.initial_node, particles);
+        let results_b = filter_b.get_results();
 
         let mut difference = Vec::new();
         let mut percentage_a = Vec::new();
@@ -172,7 +160,7 @@ impl QCircuit {
             }
         }
 
-        self.initial_node.print();
+        filter_b.print();
         println!("Results a:             {:?}", results_a);
         println!("Results b:             {:?}", results_b);
         println!("percentage_a:          {:?}", percentage_a);

@@ -15,7 +15,8 @@ use crate::circuits::{
 pub struct EnumParticleSource;
 
 impl ParticleSource for EnumParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let rand_enum = rand::thread_rng().gen_range(0, 4);
             let mut p;
@@ -30,63 +31,73 @@ impl ParticleSource for EnumParticleSource {
             }
             filter.receive_particle(&mut p);
         }
+        filter
     }
 }
 
 pub struct AngleParticleSource;
 
 impl ParticleSource for AngleParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = AngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE));
             filter.receive_particle(&mut p);
         }
+        filter
     }
 }
 
 pub struct DetAngleParticleSource;
 
 impl ParticleSource for DetAngleParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = DetAngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE));
             filter.receive_particle(&mut p);
         }
+        filter
     }
 }
 
 pub struct DetAngleParticleSourceDebug;
 
 impl ParticleSource for DetAngleParticleSourceDebug {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
         let mut angle = Angle::new(0);
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = DetAngleParticle::new(angle.angle);
             filter.receive_particle(&mut p);
             angle = angle + 1;
         }
+        filter
     }
 }
 
 pub struct DetTwoAngleParticleSource;
 
 impl ParticleSource for DetTwoAngleParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = DetTwoAngleParticle::new(
                 rand::thread_rng().gen_range(0, MAX_ANGLE),
                 rand::thread_rng().gen_range(0, MAX_ANGLE));
             filter.receive_particle(&mut p);
         }
+        filter
     }
 }
 
 pub struct DetTwoAngleParticleSourceDebug;
 
 impl ParticleSource for DetTwoAngleParticleSourceDebug {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
         let mut angle_a : u16 = 0;
         let mut angle_b : u16 = 0;
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut p = DetTwoAngleParticle::new(angle_a, angle_b);
             filter.receive_particle(&mut p);
@@ -101,6 +112,7 @@ impl ParticleSource for DetTwoAngleParticleSourceDebug {
                 angle_a = angle_a + 1;
             }
         }
+        filter
     }
 }
 
@@ -117,7 +129,8 @@ impl DetBitsParticleSource {
 }
 
 impl ParticleSource for DetBitsParticleSource {
-    fn emit_particles(&self, filter: &mut Filter, particles: u32){
+    fn emit_particles(&self, filter: &Filter, particles: u32) -> Filter {
+        let mut filter = filter.clone();
         for _ in 0..particles {
             let mut v: Vec<bool> = Vec::new();
             for _ in 0..self.bit_count + 1 {
@@ -133,5 +146,6 @@ impl ParticleSource for DetBitsParticleSource {
             let mut p = DetBitParticle::new(v, is_updown);
             filter.receive_particle(&mut p);
         }
+        filter
     }
 }
