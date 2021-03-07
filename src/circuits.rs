@@ -110,20 +110,24 @@ impl Filter {
         match self.f_type {
             FilterType::UpDown => {
                 to_return = format!("|UpDown|--Up----{}{}       |--Down--{}",
-                                    self.get_descenand_a_string(&format!("{}       |        ", prefix)),
-                                    prefix,
-                                    self.get_descenand_b_string(&format!("{}                ", prefix))
+                    self.get_descenand_a_string(&format!("{}       |        ", prefix)),
+                    prefix,
+                    self.get_descenand_b_string(&format!("{}                ", prefix))
                 );
             },
             FilterType::LeftRight => {
                 to_return = format!("|LeftRight|--Left---{}{}          |--Right--{}",
-                                    self.get_descenand_a_string(&format!("{}          |         ", prefix)),
-                                    prefix,
-                                    self.get_descenand_b_string(&format!("{}                    ", prefix))
+                    self.get_descenand_a_string(&format!("{}          |         ", prefix)),
+                    prefix,
+                    self.get_descenand_b_string(&format!("{}                    ", prefix))
                 );
             }
         }
         to_return
+    }
+
+    pub fn print(&self) {
+        print!("Source--{}\n", self.get_string(&String::from("        ")));
     }
 }
 
@@ -176,7 +180,7 @@ impl QCircuit {
         println!("percentage_a:          {:?}", percentage_a);
         println!("percentage_b:          {:?}", percentage_b);
         println!("Percentage difference: {:?}\n", percentage_difference);
-        self.print();
+        self.initial_node.print();
         for perc_diff in percentage_difference {
             if perc_diff > error {
                 return false
@@ -187,9 +191,5 @@ impl QCircuit {
 
     pub fn assert_compare(&mut self, hypothesis_a: &impl ParticleSource, hypothesis_b: &impl ParticleSource, particles: u32, error: f32) {
         assert!(self.compare(hypothesis_a, hypothesis_b, particles, error));
-    }
-
-    pub fn print(&self) {
-        print!("Source--{}\n", self.initial_node.get_string(&String::from("        ")));
     }
 }
