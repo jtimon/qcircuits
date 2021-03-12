@@ -3,7 +3,7 @@
 
 use qcircuits::angle::MAX_ANGLE;
 use qcircuits::cfactory::QCircuitFactory;
-use qcircuits::circuits::FilterType;
+use qcircuits::circuits::{FilterType, ParticleSource};
 use qcircuits::sources::{
     AngleParticleSource,
     DetAngleParticleSourceDebug,
@@ -12,57 +12,49 @@ use qcircuits::sources::{
     EnumParticleSource,
 };
 
-#[test]
-fn test_enum_angle_single() {
-    let repetitions = 100000;
-    let error = 0.7;
-    let hypothesis_a = EnumParticleSource{};
-    let hypothesis_b = AngleParticleSource{};
+fn test_series(
+    hypothesis_a: impl ParticleSource + 'static,
+    hypothesis_b: impl ParticleSource + 'static,
+    depth: u8, particles: u32, error: f32) {
 
-    QCircuitFactory::series(1, FilterType::LeftRight)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
+    QCircuitFactory::series(depth, FilterType::UpDown)
+        .assert_compare(hypothesis_a, hypothesis_b, particles, error);
+
+    QCircuitFactory::series(depth, FilterType::LeftRight)
+        .assert_compare(hypothesis_a, hypothesis_b, particles, error);
+}
+
+#[test]
+fn test_enum_angle_series1() {
+    test_series(EnumParticleSource{}, AngleParticleSource{}, 1, 100000, 0.7);
 }
 
 #[test]
 fn test_enum_det_angle_series1() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    let error = 0.7;
-    let hypothesis_a = EnumParticleSource{};
-    let hypothesis_b = DetAngleParticleSourceDebug{};
-
-    QCircuitFactory::series(1, FilterType::UpDown)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
-
-    QCircuitFactory::series(1, FilterType::LeftRight)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
+    test_series(EnumParticleSource{}, AngleParticleSource{}, 1, repetitions, 0.7);
 }
 
 #[test]
 fn test_enum_angle_series3() {
-    let repetitions = 100000;
-    let error = 0.7;
-    let hypothesis_a = EnumParticleSource{};
-    let hypothesis_b = AngleParticleSource{};
-
-    QCircuitFactory::series(3, FilterType::UpDown)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
-
-    QCircuitFactory::series(3, FilterType::LeftRight)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
+    test_series(EnumParticleSource{}, AngleParticleSource{}, 3, 100000, 0.7);
 }
 
 #[test]
-fn test_enum_det_angle_series() {
+fn test_enum_det_angle_series3() {
     let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
-    let error = 0.5;
-    let hypothesis_a = EnumParticleSource{};
-    let hypothesis_b = DetAngleParticleSourceDebug{};
+    test_series(EnumParticleSource{}, DetAngleParticleSourceDebug{}, 1, repetitions, 0.5);
+}
 
-    QCircuitFactory::series(3, FilterType::UpDown)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
+#[test]
+fn test_enum_det_2angle_series3() {
+    let repetitions = MAX_ANGLE as u32 * MAX_ANGLE as u32;
+    test_series(EnumParticleSource{}, DetTwoAngleParticleSourceDebug{}, 1, repetitions, 0.8);
+}
 
-    QCircuitFactory::series(3, FilterType::LeftRight)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
+#[test]
+fn test_enum_bits15_series3() {
+    test_series(EnumParticleSource{}, DetBitsParticleSource::new(15), 3, 100000, 0.7);
 }
 
 #[test]
@@ -230,20 +222,6 @@ fn test_enum_bits10_tree10() {
         .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
 
     QCircuitFactory::tree(10, FilterType::LeftRight)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
-}
-
-#[test]
-fn test_enum_bits15_series() {
-    let repetitions = 100000;
-    let error = 0.7;
-    let hypothesis_a = EnumParticleSource{};
-    let hypothesis_b = DetBitsParticleSource::new(15);
-
-    QCircuitFactory::series(3, FilterType::UpDown)
-        .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
-
-    QCircuitFactory::series(3, FilterType::LeftRight)
         .assert_compare(hypothesis_a, hypothesis_b, repetitions, error);
 }
 
