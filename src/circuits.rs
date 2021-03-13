@@ -17,44 +17,42 @@ pub trait Particle {
 #[derive(Clone)]
 pub struct Filter {
     f_type: FilterType,
-    descenand_a: Option<Box<Filter>>,
-    descenand_b: Option<Box<Filter>>,
-    particle_counter_a: u32,
-    particle_counter_b: u32
+    descenands: (Option<Box<Filter>>, Option<Box<Filter>>),
+    counters: (u32, u32),
 }
 
 impl Filter {
 
     pub fn new(f_type: FilterType, descenand_a: Option<Box<Filter>>, descenand_b: Option<Box<Filter>>) -> Filter {
-        Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
+        Filter{f_type, descenands: (descenand_a, descenand_b), counters: (0, 0)}
     }
 
     pub fn get_results(&self) -> Vec<u32> {
         let mut vec = Vec::new();
-        match &self.descenand_a {
+        match &self.descenands.0 {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(self.particle_counter_a),
+            None => vec.push(self.counters.0),
         }
-        match &self.descenand_b {
+        match &self.descenands.1 {
             Some(x) => vec.append(&mut x.get_results()),
-            None => vec.push(self.particle_counter_b),
+            None => vec.push(self.counters.1),
         }
         vec
     }
 
     fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenand_a {
+        if let &mut Some(ref mut x) = &mut self.descenands.0 {
             x.receive_particle(particle);
         } else {
-            self.particle_counter_a += 1;
+            self.counters.0 += 1;
         }
     }
 
     fn transfer_to_b(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenand_b {
+        if let &mut Some(ref mut x) = &mut self.descenands.1 {
             x.receive_particle(particle);
         } else {
-            self.particle_counter_b += 1;
+            self.counters.1 += 1;
         }
     }
 
@@ -80,18 +78,18 @@ impl Filter {
 
     fn get_descenand_a_string(&self, prefix: &String) -> String {
         let descenand_a_string;
-        match &self.descenand_a {
+        match &self.descenands.0 {
             Some(x) => descenand_a_string = x.get_string(prefix),
-            None => descenand_a_string = format!("Detector: {} particles\n", self.particle_counter_a)
+            None => descenand_a_string = format!("Detector: {} particles\n", self.counters.0)
         }
         descenand_a_string
     }
 
     fn get_descenand_b_string(&self, prefix: &String) -> String {
         let descenand_b_string;
-        match &self.descenand_b {
+        match &self.descenands.1 {
             Some(x) => descenand_b_string = x.get_string(prefix),
-            None => descenand_b_string = format!("Detector: {} particles\n", self.particle_counter_b)
+            None => descenand_b_string = format!("Detector: {} particles\n", self.counters.1)
         }
         descenand_b_string
     }
