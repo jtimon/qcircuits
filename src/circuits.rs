@@ -50,8 +50,8 @@ impl Filter {
     }
 
     pub fn receive_particles_recu(&mut self, particles: Vec<Box<dyn Particle>>) {
-        let mut observed_a = vec![];
-        let mut observed_b = vec![];
+        let mut observed_a : Vec<Box<dyn Particle>> = vec![];
+        let mut observed_b : Vec<Box<dyn Particle>> = vec![];
 
         match self.f_type {
             FilterType::UpDown => {
@@ -75,16 +75,18 @@ impl Filter {
             }
         }
 
-        if let &mut Some(ref mut x) = &mut self.descenand_a {
-            x.receive_particles_recu(observed_a);
-        } else {
-            self.particle_counter_a += observed_a.len();
+        if self.descenand_a.is_none() {
+            self.particle_counter_b += observed_a.len();
+        }
+        if self.descenand_b.is_none() {
+            self.particle_counter_b += &observed_b.len();
         }
 
+        if let &mut Some(ref mut x) = &mut self.descenand_a {
+            x.receive_particles_recu(observed_a);
+        }
         if let &mut Some(ref mut x) = &mut self.descenand_b {
             x.receive_particles_recu(observed_b);
-        } else {
-            self.particle_counter_b += observed_b.len();
         }
     }
 
