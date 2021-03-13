@@ -2,6 +2,8 @@
 
 use std::thread;
 
+pub const BATCH_PARTICLE: usize = 10000;
+
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
@@ -24,8 +26,8 @@ pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,
     descenand_b: Option<Box<Filter>>,
-    particle_counter_a: u32,
-    particle_counter_b: u32
+    particle_counter_a: usize,
+    particle_counter_b: usize
 }
 
 impl Filter {
@@ -34,7 +36,7 @@ impl Filter {
         Filter{f_type, descenand_a, descenand_b, particle_counter_a: 0, particle_counter_b: 0}
     }
 
-    pub fn get_results(&self) -> Vec<u32> {
+    pub fn get_results(&self) -> Vec<usize> {
         let mut vec = Vec::new();
         match &self.descenand_a {
             Some(x) => vec.append(&mut x.get_results()),
@@ -47,34 +49,57 @@ impl Filter {
         vec
     }
 
-    pub fn receive_particle(&mut self, particle: &mut dyn Particle) {
-        let observe;
+    pub fn receive_particles_recu(&mut self, particles: Vec<Box<dyn Particle>>) {
+        let mut observed_a = vec![];
+        let mut observed_b = vec![];
+
         match self.f_type {
-            FilterType::UpDown => observe = particle.observe_updown(),
-            FilterType::LeftRight => observe = particle.observe_leftright()
+            FilterType::UpDown => {
+                for mut p in particles {
+                    if p.observe_updown() {
+                        observed_a.push(p);
+                    } else {
+                        observed_b.push(p);
+                    }
+                }
+            },
+
+            FilterType::LeftRight => {
+                for mut p in particles {
+                    if p.observe_leftright() {
+                        observed_a.push(p);
+                    } else {
+                        observed_b.push(p);
+                    }
+                }
+            }
         }
 
-        if observe {
-            if let &mut Some(ref mut x) = &mut self.descenand_a {
-                x.receive_particle(particle);
-            } else {
-                self.particle_counter_a += 1;
-            }
-
+        if let &mut Some(ref mut x) = &mut self.descenand_a {
+            x.receive_particles_recu(observed_a);
         } else {
-            if let &mut Some(ref mut x) = &mut self.descenand_b {
-                x.receive_particle(particle);
-            } else {
-                self.particle_counter_b += 1;
-            }
+            self.particle_counter_a += observed_a.len();
+        }
+
+        if let &mut Some(ref mut x) = &mut self.descenand_b {
+            x.receive_particles_recu(observed_b);
+        } else {
+            self.particle_counter_b += observed_b.len();
         }
     }
 
-    fn receive_particles(&self, source: &mut (impl ParticleSource + 'static), particles: u32) -> Filter {
+    fn receive_particles(&self, source: &mut (impl ParticleSource + 'static), n_particles: u32) -> Filter {
         let mut filter = self.clone();
-        for _ in 0..particles {
-            let mut p = source.get_particle();
-            filter.receive_particle(&mut *p);
+        let mut n_particles = n_particles as usize;
+        while n_particles > 0 {
+            let iter = std::cmp::min(BATCH_PARTICLE, n_particles);
+            n_particles -= iter;
+            let mut particles : Vec<Box<dyn Particle>> = vec![];
+            for _ in 0..iter {
+                let p = source.get_particle();
+                particles.push(p);
+            }
+            filter.receive_particles_recu(particles);
         }
         filter
     }
