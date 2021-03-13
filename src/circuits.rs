@@ -1,5 +1,6 @@
 //! The circuit module contains the structs and methods to create and run the circuits
 
+use std::sync::Arc;
 use std::thread;
 
 pub const BATCH_PARTICLE: usize = 10000;
@@ -82,13 +83,20 @@ impl Filter {
             self.particle_counter_b += &observed_b.len();
         }
 
+        let mut handle_a = thread::spawn(move || {
+            true
+        });
+
         if let &mut Some(ref mut x) = &mut self.descenand_a {
-            x.receive_particles_recu(observed_a);
+            self.descenand_a = Some(Box::new(x.receive_particles_recu(observed_a)));
         }
         if let &mut Some(ref mut x) = &mut self.descenand_b {
-            x.receive_particles_recu(observed_b);
+            self.descenand_b = Some(Box::new(x.receive_particles_recu(observed_b)));
         }
-        self.clone()
+
+        handle_a.join().unwrap();
+        let mut filter = self.clone();
+        filter
     }
 
     fn receive_particles(&self, source: &mut (impl ParticleSource + 'static), n_particles: u32) -> Filter {
