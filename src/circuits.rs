@@ -40,39 +40,32 @@ impl Filter {
         vec
     }
 
-    fn transfer_to_a(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenands.0 {
-            x.receive_particle(particle);
-        } else {
-            self.counters.0 += 1;
-        }
-    }
-
-    fn transfer_to_b(&mut self, particle: &mut dyn Particle) {
-        if let &mut Some(ref mut x) = &mut self.descenands.1 {
-            x.receive_particle(particle);
-        } else {
-            self.counters.1 += 1;
-        }
-    }
-
     pub fn receive_particle(&mut self, particle: &mut dyn Particle) {
+
+        let observe;
         match self.f_type {
             FilterType::UpDown => {
-                if particle.observe_updown() {
-                    self.transfer_to_a(particle);
-                } else {
-                    self.transfer_to_b(particle);
-                }
+                observe = particle.observe_updown()
             },
-
             FilterType::LeftRight => {
-                if particle.observe_leftright() {
-                    self.transfer_to_a(particle);
-                } else {
-                    self.transfer_to_b(particle);
-                }
+                observe = particle.observe_leftright()
             },
+        }
+
+        if observe {
+
+            if let &mut Some(ref mut x) = &mut self.descenands.0 {
+                x.receive_particle(particle);
+            } else {
+                self.counters.0 += 1;
+            }
+        } else {
+
+            if let &mut Some(ref mut x) = &mut self.descenands.1 {
+                x.receive_particle(particle);
+            } else {
+                self.counters.1 += 1;
+            }
         }
     }
 
