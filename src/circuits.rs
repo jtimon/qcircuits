@@ -9,7 +9,7 @@ pub const BATCH_PARTICLE: usize = 10000;
 pub enum FilterType {UpDown, LeftRight}
 
 /// A particle can be observed by a Filter or counted by a Detector.
-pub trait Particle {
+pub trait Particle : Send {
     // if up returns true, false otherwise
     fn observe_updown(&mut self) -> bool;
     // if left returns true, false otherwise
@@ -22,13 +22,26 @@ pub trait ParticleSource : Copy + Clone + Send {
 }
 
 /// Filters send particles to either descenand_a or descenand_b
-#[derive(Clone)]
+// REM Deriving Copy is dangerous for Filter
+// #[derive(Copy)]
 pub struct Filter {
     f_type: FilterType,
     descenand_a: Option<Box<Filter>>,
     descenand_b: Option<Box<Filter>>,
     particle_counter_a: usize,
     particle_counter_b: usize
+}
+
+impl Clone for Filter {
+    fn clone(&self) -> Filter {
+        Filter {
+            f_type: self.f_type,
+            descenand_a: self.descenand_a.clone(),
+            descenand_b: self.descenand_b.clone(),
+            particle_counter_a: self.particle_counter_a,
+            particle_counter_b: self.particle_counter_b,
+        }
+    }
 }
 
 impl Filter {
@@ -50,11 +63,12 @@ impl Filter {
         vec
     }
 
-    pub fn receive_particles_recu(&mut self, particles: Vec<Box<dyn Particle>>) -> Filter {
+    pub fn receive_particles_recu(&self, particles: Vec<Box<dyn Particle>>) -> Filter {
+        let mut filter = self.clone();
         let mut observed_a : Vec<Box<dyn Particle>> = vec![];
         let mut observed_b : Vec<Box<dyn Particle>> = vec![];
 
-        match self.f_type {
+        match filter.f_type {
             FilterType::UpDown => {
                 for mut p in particles {
                     if p.observe_updown() {
@@ -76,26 +90,33 @@ impl Filter {
             }
         }
 
-        if self.descenand_a.is_none() {
-            self.particle_counter_b += observed_a.len();
+        if filter.descenand_a.is_none() {
+            filter.particle_counter_a += observed_a.len();
         }
-        if self.descenand_b.is_none() {
-            self.particle_counter_b += &observed_b.len();
+        if filter.descenand_b.is_none() {
+            filter.particle_counter_b += observed_b.len();
         }
 
-        let mut handle_a = thread::spawn(move || {
-            true
+        let afa = Arc::new(filter.descenand_a.clone());
+        let handle_a = thread::spawn(move || {
+            if let &Some(ref x) = &*afa {
+                Some(Box::new(x.receive_particles_recu(observed_a)))
+            } else {
+                None
+            }
         });
 
-        if let &mut Some(ref mut x) = &mut self.descenand_a {
-            self.descenand_a = Some(Box::new(x.receive_particles_recu(observed_a)));
-        }
-        if let &mut Some(ref mut x) = &mut self.descenand_b {
-            self.descenand_b = Some(Box::new(x.receive_particles_recu(observed_b)));
-        }
+        let afb = Arc::new(filter.descenand_b.clone());
+        let handle_b = thread::spawn(move || {
+            if let &Some(ref x) = &*afb {
+                Some(Box::new(x.receive_particles_recu(observed_b)))
+            } else {
+                None
+            }
+        });
 
-        handle_a.join().unwrap();
-        let mut filter = self.clone();
+        filter.descenand_a = handle_a.join().unwrap();
+        filter.descenand_b = handle_b.join().unwrap();
         filter
     }
 
