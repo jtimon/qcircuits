@@ -13,6 +13,11 @@ pub trait Particle {
     fn observe_leftright(&mut self) -> bool;
 }
 
+/// A particle source can emit particles
+pub trait ParticleSource : Copy + Clone + Send {
+    fn get_particle(&mut self) -> Box<dyn Particle>;
+}
+
 /// Filters send particles to either descenand_a or descenand_b
 #[derive(Clone)]
 pub struct Filter {
@@ -78,6 +83,15 @@ impl Filter {
         }
     }
 
+    fn receive_particles(&self, source: &mut (impl ParticleSource + 'static), particles: u32) -> Filter {
+        let mut filter = self.clone();
+        for _ in 0..particles {
+            let mut p = source.get_particle();
+            filter.receive_particle(&mut *p);
+        }
+        filter
+    }
+
     fn get_descenand_a_string(&self, prefix: &String) -> String {
         let descenand_a_string;
         match &self.descenand_a {
@@ -122,20 +136,6 @@ impl Filter {
     }
 }
 
-/// A particle source can emit particles towards a CircuitNode (Filter or Detector)
-pub trait ParticleSource : Copy + Send {
-    fn get_particle(&mut self) -> Box<dyn Particle>;
-
-    fn emit_particles(&mut self, filter: &Filter, particles: u32) -> Filter {
-        let mut filter = filter.clone();
-        for _ in 0..particles {
-            let mut p = self.get_particle();
-            filter.receive_particle(&mut *p);
-        }
-        filter
-    }
-}
-
 pub struct QCircuit {
     initial_node: Filter
 }
@@ -153,11 +153,11 @@ impl QCircuit {
 
         let filter_a = self.initial_node.clone();
         let handle_a = thread::spawn(move || {
-            hypothesis_a.clone().emit_particles(&filter_a, particles)
+            filter_a.receive_particles(&mut hypothesis_a.clone(), particles)
         });
         let filter_b = self.initial_node.clone();
         let handle_b = thread::spawn(move || {
-            hypothesis_b.clone().emit_particles(&filter_b, particles)
+            filter_b.receive_particles(&mut hypothesis_b.clone(), particles)
         });
 
         let filter_a = handle_a.join().unwrap();
