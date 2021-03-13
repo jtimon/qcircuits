@@ -9,7 +9,8 @@ pub const BATCH_PARTICLE: usize = 10000;
 pub enum FilterType {UpDown, LeftRight}
 
 /// A particle can be observed by a Filter or counted by a Detector.
-pub trait Particle : Send {
+#[derive(Clone)]
+pub trait Particle : Send + Sync {
     // if up returns true, false otherwise
     fn observe_updown(&mut self) -> bool;
     // if left returns true, false otherwise
@@ -90,17 +91,11 @@ impl Filter {
             }
         }
 
-        if filter.descenand_a.is_none() {
-            filter.particle_counter_a += observed_a.len();
-        }
-        if filter.descenand_b.is_none() {
-            filter.particle_counter_b += observed_b.len();
-        }
-
         let afa = Arc::new(filter.descenand_a.clone());
+        let oba = Arc::new(&observed_a);
         let handle_a = thread::spawn(move || {
             if let &Some(ref x) = &*afa {
-                Some(Box::new(x.receive_particles_recu(observed_a)))
+                Some(Box::new(x.receive_particles_recu(*oba)))
             } else {
                 None
             }
@@ -115,6 +110,12 @@ impl Filter {
             }
         });
 
+        if filter.descenand_a.is_none() {
+            filter.particle_counter_a += observed_a.len();
+        }
+        if filter.descenand_b.is_none() {
+            filter.particle_counter_b += observed_b.len();
+        }
         filter.descenand_a = handle_a.join().unwrap();
         filter.descenand_b = handle_b.join().unwrap();
         filter
