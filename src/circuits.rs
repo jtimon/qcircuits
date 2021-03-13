@@ -16,6 +16,11 @@ pub trait Particle {
     fn observe_leftright(&mut self) -> bool;
 }
 
+/// A particle factory can produce particles on demand
+pub trait ParticleFactory {
+    fn get_particle(&mut self) -> Box<dyn Particle>;
+}
+
 /// Filters send particles to either descenand_a or descenand_b
 #[derive(Clone)]
 pub struct Filter {
@@ -81,6 +86,21 @@ impl Filter {
         }
     }
 
+    pub fn receive_particles(&mut self, n_particles: u32, factory: Boc<dyn ParticleFactory>) {
+        let mut n_particles = n_particles;
+        while n_particles > 0 {
+            let iter = std::cmp::min(n_particles, BATCH_PARTICLES);
+            n_particles -= iter;
+            let mut particles = vec![];
+            for _ in 0..iter {
+                particles.push(factory.get_particle());
+            }
+            for p in particles {
+                self.receive_particle(&p);
+            }
+        }
+    }
+
     fn get_descenand_a_string(&self, prefix: &String) -> String {
         let descenand_a_string;
         match &self.descenand_a {
@@ -126,25 +146,10 @@ impl Filter {
 }
 
 /// A particle source can emit particles towards a CircuitNode (Filter or Detector)
-pub trait ParticleSource : Copy + Send {
-    fn get_particle(&mut self) -> Box<dyn Particle>;
-
+pub trait ParticleSource : ParticleFactory + Copy + Send {
     fn emit_particles(&mut self, filter: &Filter, n_particles: u32) -> Filter {
         let mut filter = filter.clone();
-        let mut n_particles = n_particles;
-        while n_particles > 0 {
-            let iter = std::cmp::min(n_particles, BATCH_PARTICLES);
-            n_particles -= iter;
-            let mut particles = vec![];
-            for _ in 0..iter {
-                particles.push(self.get_particle());
-            }
-
-            for mut p in particles {
-                filter.receive_particle(&mut *p);
-            }
-        }
-        filter
+        filter.receive_particles(n_particles, &mut self);
     }
 }
 

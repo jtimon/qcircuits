@@ -9,13 +9,13 @@ use crate::hypotheses::rand_ang::AngleParticle;
 use crate::hypotheses::rand_enum::{EnumParticle, ParticleState};
 use crate::circuits::{
     Particle,
-    ParticleSource,
+    ParticleFactory,
 };
 
 #[derive(Copy, Clone)]
 pub struct EnumParticleSource;
 
-impl ParticleSource for EnumParticleSource {
+impl ParticleFactory for EnumParticleSource {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         let rand_enum = rand::thread_rng().gen_range(0, 4);
         if rand_enum == 0 {
@@ -33,7 +33,7 @@ impl ParticleSource for EnumParticleSource {
 #[derive(Copy, Clone)]
 pub struct AngleParticleSource;
 
-impl ParticleSource for AngleParticleSource {
+impl ParticleFactory for AngleParticleSource {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         Box::new(AngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE)))
     }
@@ -42,7 +42,7 @@ impl ParticleSource for AngleParticleSource {
 #[derive(Copy, Clone)]
 pub struct DetAngleParticleSource;
 
-impl ParticleSource for DetAngleParticleSource {
+impl ParticleFactory for DetAngleParticleSource {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         Box::new(DetAngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE)))
     }
@@ -59,7 +59,7 @@ impl DetAngleParticleSourceDebug {
     }
 }
 
-impl ParticleSource for DetAngleParticleSourceDebug {
+impl ParticleFactory for DetAngleParticleSourceDebug {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         let p = DetAngleParticle::new(self.angle);
         if self.angle == MAX_ANGLE - 1 {
@@ -74,7 +74,7 @@ impl ParticleSource for DetAngleParticleSourceDebug {
 #[derive(Copy, Clone)]
 pub struct DetTwoAngleParticleSource;
 
-impl ParticleSource for DetTwoAngleParticleSource {
+impl ParticleFactory for DetTwoAngleParticleSource {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         Box::new(DetTwoAngleParticle::new(rand::thread_rng().gen_range(0, MAX_ANGLE), rand::thread_rng().gen_range(0, MAX_ANGLE)))
     }
@@ -92,7 +92,7 @@ impl DetTwoAngleParticleSourceDebug {
     }
 }
 
-impl ParticleSource for DetTwoAngleParticleSourceDebug {
+impl ParticleFactory for DetTwoAngleParticleSourceDebug {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         let p = DetTwoAngleParticle::new(self.angle_a, self.angle_b);
         if self.angle_a == MAX_ANGLE - 1 {
@@ -122,7 +122,7 @@ impl DetBitsParticleSource {
     }
 }
 
-impl ParticleSource for DetBitsParticleSource {
+impl ParticleFactory for DetBitsParticleSource {
     fn get_particle(&mut self) -> Box<dyn Particle> {
         let mut v: Vec<bool> = Vec::new();
         for _ in 0..self.bit_count + 1 {
