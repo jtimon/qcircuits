@@ -49,7 +49,7 @@ impl Filter {
         vec
     }
 
-    pub fn receive_particles_recu(&mut self, particles: Vec<Box<dyn Particle>>) {
+    pub fn receive_particles_recu(&mut self, particles: Vec<Box<dyn Particle>>) -> Filter {
         let mut observed_a : Vec<Box<dyn Particle>> = vec![];
         let mut observed_b : Vec<Box<dyn Particle>> = vec![];
 
@@ -88,6 +88,7 @@ impl Filter {
         if let &mut Some(ref mut x) = &mut self.descenand_b {
             x.receive_particles_recu(observed_b);
         }
+        self.clone()
     }
 
     fn receive_particles(&self, source: &mut (impl ParticleSource + 'static), n_particles: u32) -> Filter {
@@ -101,7 +102,7 @@ impl Filter {
                 let p = source.get_particle();
                 particles.push(p);
             }
-            filter.receive_particles_recu(particles);
+            filter = filter.receive_particles_recu(particles);
         }
         filter
     }
