@@ -2,6 +2,9 @@
 
 use std::thread;
 
+/// Ther number of particles processed in series per concurrent thread
+pub const BATCH_PARTICLES: u32 = 100;
+
 #[derive(Copy, Clone)]
 pub enum FilterType {UpDown, LeftRight}
 
@@ -126,11 +129,20 @@ impl Filter {
 pub trait ParticleSource : Copy + Send {
     fn get_particle(&mut self) -> Box<dyn Particle>;
 
-    fn emit_particles(&mut self, filter: &Filter, particles: u32) -> Filter {
+    fn emit_particles(&mut self, filter: &Filter, n_particles: u32) -> Filter {
         let mut filter = filter.clone();
-        for _ in 0..particles {
-            let mut p = self.get_particle();
-            filter.receive_particle(&mut *p);
+        let mut n_particles = n_particles;
+        while n_particles > 0 {
+            let iter = std::cmp::min(n_particles, BATCH_PARTICLES);
+            n_particles -= iter;
+            let mut particles = vec![];
+            for _ in 0..iter {
+                particles.push(self.get_particle());
+            }
+
+            for mut p in particles {
+                filter.receive_particle(&mut *p);
+            }
         }
         filter
     }
